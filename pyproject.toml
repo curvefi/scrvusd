@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "stcrvusd"
+version = "0.1.0"
+description = ""
+authors = ["Curve.fi"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "3.12.4"
+vyper = "0.4.0"
+titanoboa = { git = "https://github.com/vyperlang/titanoboa.git", rev="144977af82077342368fc7c2e9c6e8a9496fe216" }
+snekmate = "0.1.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.2.2"
+pytest-xdist = "^3.6.1"
+mamushi = "0.0.4a1"
+
+[tool.poetry.group.scripts.dependencies]
+tqdm = "^4.66.5"
+curve-dao = "^1.0.0"
+jupyter = "^1.0.0"
+python-dotenv = "^1.0.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
