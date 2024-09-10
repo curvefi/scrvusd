@@ -5,6 +5,7 @@ from ethereum.ercs import IERC165
 from interfaces import IVault
 
 from snekmate.auth import access_control
+
 initializes: access_control
 
 from interfaces import IStablecoinLens as ILens
@@ -17,7 +18,7 @@ stablecoin: immutable(address)
 vault: immutable(address)
 # TODO should this be mutable and have a 22k overhead or immutable for just 0.1k
 lens: address
-WEEK: constant(uint256) = 86400 * 7 # 7 days
+WEEK: constant(uint256) = 86400 * 7  # 7 days
 
 # implements: IERC165
 initializes: twap

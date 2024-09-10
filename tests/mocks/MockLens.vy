@@ -2,6 +2,7 @@
 
 supply: uint256
 
+
 @view
 @external
 def circulating_supply() -> uint256:

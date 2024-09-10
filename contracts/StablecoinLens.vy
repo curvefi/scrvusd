@@ -3,8 +3,8 @@
 from interfaces import IPegKeeper
 from interfaces import IController
 
-MAX_CONTROLLERS: constant(uint256) = 50000 # TODO check actual number
-MAX_PEG_KEEPERS: constant(uint256) = 100 # TODO check actual number
+MAX_CONTROLLERS: constant(uint256) = 50000  # TODO check actual number
+MAX_PEG_KEEPERS: constant(uint256) = 100  # TODO check actual number
 
 controllers: DynArray[address, MAX_CONTROLLERS]
 peg_keepers: DynArray[address, MAX_PEG_KEEPERS]
