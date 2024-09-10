@@ -1,0 +1,4 @@
+@view
+@external
+def total_debt() -> uint256:
+    ...

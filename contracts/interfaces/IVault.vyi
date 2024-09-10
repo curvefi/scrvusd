@@ -1,0 +1,11 @@
+# pragma version ~=0.4
+
+
+@external
+def setProfitMaxUnlockTime(new_profit_max_unlock_time: uint256):
+    ...
+
+
+@external
+def process_report(strategy: address) -> (uint256, uint256):
+    ...
