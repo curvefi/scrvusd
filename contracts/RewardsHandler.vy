@@ -68,5 +68,5 @@ def process_rewards():
 def correct_distribution_rate(new_profit_max_unlock_time: uint256):
     access_control._check_role(RATE_ADMIN, msg.sender)
 
-    extcall IVault(vault).setProfitMaxUnlockTime(WEEK)
+    extcall IVault(vault).setProfitMaxUnlockTime(new_profit_max_unlock_time)
     extcall IVault(vault).process_report(self)
