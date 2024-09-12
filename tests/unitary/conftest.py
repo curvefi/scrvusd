@@ -53,6 +53,15 @@ def lens():
 
 
 @pytest.fixture(scope="module")
+def vault_god(vault, role_manager):
+    _god = boa.env.generate_address()
+
+    vault.set_role(_god, int("11111111111111", 2), sender=role_manager)
+
+    return _god
+
+
+@pytest.fixture(scope="module")
 def rewards_handler(vault, crvusd, role_manager):
     rh = boa.load("contracts/RewardsHandler.vy", crvusd, vault)
 
