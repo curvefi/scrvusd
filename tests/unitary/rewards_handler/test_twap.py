@@ -1,5 +1,4 @@
 import boa
-import pytest
 
 
 def test_boa_timemachine():
@@ -36,7 +35,9 @@ def test_twap_single_deposit(vault, crvusd, rewards_handler, lens, vault_god):
     ), "TWAP does not match expected deposit amount"
 
 
-def test_twap_multiple_deposits(vault, crvusd, rewards_handler, lens, vault_god):
+def test_twap_multiple_deposits(
+    vault, crvusd, rewards_handler, lens, vault_god
+):
     # Prepare Alice's balance
     alice = boa.env.generate_address()
     boa.deal(crvusd, alice, 100_000_000 * 10**18)
@@ -84,8 +85,12 @@ def test_twap_multiple_deposits(vault, crvusd, rewards_handler, lens, vault_god)
     twap = rewards_handler.tvl_twap()
 
     # Actual staked rate
-    staked_rate = AMT_DEPOSIT * N_ITERATIONS * 10**18 // lens.circulating_supply()
+    staked_rate = (
+        AMT_DEPOSIT * N_ITERATIONS * 10**18 // lens.circulating_supply()
+    )
     print(f"Staked rate: {staked_rate}, TWAP: {twap}")
     # Compare the expected TWAP to the contract's TWAP
     assert twap < staked_rate, "TWAP is too high"
-    assert twap == expected_twap, f"TWAP {twap} does not match expected {expected_twap}"
+    assert (
+        twap == expected_twap
+    ), f"TWAP {twap} does not match expected {expected_twap}"
