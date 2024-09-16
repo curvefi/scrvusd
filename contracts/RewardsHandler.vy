@@ -70,7 +70,7 @@ def adjust_twap_window(_twap_window: uint256):
 @external
 @view
 def weight() -> uint256:
-    return twap.compute_twap()
+    return twap.compute()
 
 
 @external

@@ -39,7 +39,7 @@ def get_twap_window() -> uint256:
 @external
 @view
 def tvl_twap() -> uint256:
-    return self.compute_twap()
+    return self.compute()
 
 
 @internal
@@ -54,7 +54,7 @@ def store_snapshot(staked_supply_rate: uint256):
 
 
 @view
-def compute_twap() -> uint256:
+def compute() -> uint256:
     """
     @notice Computes the TWAP over the specified time window by iterating backwards over the snapshots.
     @return The TWAP staked supply rate over the self.twap_window (10**18 decimals precision).
@@ -74,7 +74,7 @@ def compute_twap() -> uint256:
         i_backwards: uint256 = num_snapshots - 1 - i
         current_snapshot: Snapshot = self.snapshots[i_backwards]
 
-        # Figure out snapshot interval wrt current time and time_window_start
+        # Figure out snapshot interval wrt current time (Now) and time_window_start
         # Time Axis (Increasing to the Right) --->
         # |---------|---------|---------|---------|------------------------|---------|---------|
         # t0        t1   time_window_start        interval_start           interval_end       Now
@@ -86,30 +86,34 @@ def compute_twap() -> uint256:
             interval_start = time_window_start
 
         interval_end: uint256 = 0
-        if i_backwards == num_snapshots - 1:
+        next_snapshot: Snapshot = current_snapshot
+        if i == 0:  # First iteration - we are on the last snapshot (i_backwards = num_snapshots - 1)
             # For the last snapshot, interval end is current_time
             interval_end = current_time
+            # Set next_snapshot to current_snapshot for the last snapshot
+            # next_snapshot = current_snapshot (already initialized as current_snapshot)
         else:
             # For other snapshots, interval end is the timestamp of the next snapshot
             interval_end = self.snapshots[i_backwards + 1].timestamp
+            # Set next_snapshot to the next snapshot
+            next_snapshot = self.snapshots[i_backwards + 1]
 
-
-        # Break if interval end is before the time window start (so we don't consider old snapshots)
         if interval_end <= time_window_start:
             break
 
-
-        #time covered by current snapshot
         time_delta: uint256 = interval_end - interval_start
 
+        # Interpolation using the trapezoidal rule
+        average_staked_supply_rate: uint256 = (
+            current_snapshot.staked_supply_rate + next_snapshot.staked_supply_rate
+        ) // 2
+
         # Accumulate weighted rate and time
-        weighted_staked_supply_rate: uint256 = current_snapshot.staked_supply_rate * time_delta
+        weighted_staked_supply_rate: uint256 = average_staked_supply_rate * time_delta
         total_weighted_staked_supply_rate += weighted_staked_supply_rate
         total_time += time_delta
 
-
-    # Calculate the TWAP
-    assert total_time > 0, "No snapshots in twap time window"
+    assert total_time > 0, "Edge case: total_time is zero"
     twap: uint256 = total_weighted_staked_supply_rate // total_time
 
     return twap
