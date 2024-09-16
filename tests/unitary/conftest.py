@@ -36,9 +36,7 @@ def role_manager():
 def vault(vault_factory, crvusd, role_manager):
     vault_deployer = boa.load_partial("contracts/yearn/Vault.vy")
 
-    address = vault_factory.deploy_new_vault(
-        crvusd, "Staked crvUSD", "st-crvUSD", role_manager, 0
-    )
+    address = vault_factory.deploy_new_vault(crvusd, "Staked crvUSD", "st-crvUSD", role_manager, 0)
 
     return vault_deployer.at(address)
 
