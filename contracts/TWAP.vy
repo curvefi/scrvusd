@@ -2,10 +2,10 @@
 
 MAX_SNAPSHOTS: constant(uint256) = 10**18  # 31.7 billion years if snapshot every second
 
-snapshots: DynArray[Snapshot, MAX_SNAPSHOTS]
-min_snapshot_dt_seconds: uint256  # Minimum time between snapshots in seconds
-twap_window: uint256  # Time window in seconds for TWAP calculation
-last_timestamp: uint256  # Timestamp of the last snapshot (assigned in RewardsHandler)
+snapshots: public(DynArray[Snapshot, MAX_SNAPSHOTS])
+min_snapshot_dt_seconds: public(uint256)  # Minimum time between snapshots in seconds
+twap_window: public(uint256)  # Time window in seconds for TWAP calculation
+last_snapshot_timestamp: public(uint256)  # Timestamp of the last snapshot (assigned in RewardsHandler)
 
 
 struct Snapshot:
@@ -14,26 +14,15 @@ struct Snapshot:
 
 
 @deploy
-def __init__(_twap_window: uint256):
+def __init__(_twap_window: uint256, _min_snapshot_dt_seconds: uint256):
     self.twap_window = _twap_window  # one week (in seconds)
+    self.min_snapshot_dt_seconds = _min_snapshot_dt_seconds  # 1s
 
 
 @external
 @view
-def get_snapshot(_index: uint256) -> Snapshot:
-    return self.snapshots[_index]
-
-
-@external
-@view
-def get_n_snapshots() -> uint256:
+def get_len_snapshots() -> uint256:
     return len(self.snapshots)
-
-
-@external
-@view
-def get_twap_window() -> uint256:
-    return self.twap_window
 
 
 @external
@@ -42,15 +31,18 @@ def tvl_twap() -> uint256:
     return self.compute()
 
 
+
 @internal
 def store_snapshot(staked_supply_rate: uint256):
     """
     @notice Stores a snapshot of the staked supply rate into storage DynArray
     @param staked_supply_rate The staked supply rate to store
     """
-    self.snapshots.append(
-        Snapshot(staked_supply_rate=staked_supply_rate, timestamp=block.timestamp)
-    )  # store the snapshot into the list
+    if self.last_snapshot_timestamp + self.min_snapshot_dt_seconds <= block.timestamp:
+        self.last_snapshot_timestamp = block.timestamp
+        self.snapshots.append(
+            Snapshot(staked_supply_rate=staked_supply_rate, timestamp=block.timestamp)
+        )  # store the snapshot into the list
 
 
 @view
@@ -63,8 +55,7 @@ def compute() -> uint256:
     if num_snapshots == 0:
         return 0
 
-    current_time: uint256 = block.timestamp
-    time_window_start: uint256 = current_time - self.twap_window
+    time_window_start: uint256 = block.timestamp - self.twap_window
 
     total_weighted_staked_supply_rate: uint256 = 0
     total_time: uint256 = 0
@@ -81,7 +72,7 @@ def compute() -> uint256:
         # Figure out snapshot interval wrt current time (Now) and time_window_start
         # Time Axis (Increasing to the Right) --->
         # |---------|---------|---------|---------|------------------------|---------|---------|
-        # t0        t1   time_window_start        interval_start           interval_end       Now
+        # t0        t1   time_window_start        interval_start           interval_end     block.timestamp (Now)
         interval_start: uint256 = current_snapshot.timestamp
         # Adjust interval start if it is before the time window start
         if interval_start < time_window_start:
@@ -89,8 +80,8 @@ def compute() -> uint256:
 
         interval_end: uint256 = 0
         if i == 0:  # First iteration - we are on the last snapshot (i_backwards = num_snapshots - 1)
-            # For the last snapshot, interval end is current_time
-            interval_end = current_time
+            # For the last snapshot, interval end is block.timestamp
+            interval_end = block.timestamp
         else:
             # For other snapshots, interval end is the timestamp of the next snapshot
             interval_end = next_snapshot.timestamp

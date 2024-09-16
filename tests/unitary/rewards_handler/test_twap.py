@@ -22,7 +22,7 @@ def test_twap_one_deposit(vault, crvusd, rewards_handler, lens, vault_god):
 
     # Deposit and take snapshots over time
     AMT_DEPOSIT = 10 * 10**18
-    TWAP_WINDOW = rewards_handler.get_twap_window()
+    TWAP_WINDOW = rewards_handler.twap_window()
 
     vault.deposit(AMT_DEPOSIT, alice, sender=alice)
     rewards_handler.take_snapshot()
@@ -30,7 +30,9 @@ def test_twap_one_deposit(vault, crvusd, rewards_handler, lens, vault_god):
 
     # Compute TWAP
     twap = rewards_handler.tvl_twap()
-    assert twap == AMT_DEPOSIT * 10**18 // lens.circulating_supply(), "TWAP does not match expected deposit amount"
+    assert (
+        twap == AMT_DEPOSIT * 10**18 // lens.circulating_supply()
+    ), "TWAP does not match expected deposit amount"
 
 
 def test_twap_two_deposits(vault, crvusd, rewards_handler, lens, vault_god):
@@ -47,7 +49,7 @@ def test_twap_two_deposits(vault, crvusd, rewards_handler, lens, vault_god):
 
     # Deposit and take snapshots over time
     AMT_DEPOSIT = 10 * 10**18
-    TWAP_WINDOW = rewards_handler.get_twap_window()
+    TWAP_WINDOW = rewards_handler.twap_window()
 
     vault.deposit(AMT_DEPOSIT, alice, sender=alice)
     rewards_handler.take_snapshot()
@@ -64,7 +66,9 @@ def test_twap_two_deposits(vault, crvusd, rewards_handler, lens, vault_god):
     ), "TWAP does not match expected deposit amount"
 
 
-def test_twap_multiple_deposits(vault, crvusd, rewards_handler, lens, vault_god):
+def test_twap_multiple_deposits(
+    vault, crvusd, rewards_handler, lens, vault_god
+):
     # Prepare Alice's balance
     alice = boa.env.generate_address()
     boa.deal(crvusd, alice, 100_000_000 * 10**18)
@@ -78,9 +82,11 @@ def test_twap_multiple_deposits(vault, crvusd, rewards_handler, lens, vault_god)
 
     # Define parameters
     AMT_DEPOSIT = 10 * 10**18  # Amount to deposit per iteration
-    TWAP_WINDOW = rewards_handler.get_twap_window()  # TWAP window (e.g., one week)
+    TWAP_WINDOW = rewards_handler.twap_window()  # TWAP window (e.g., one week)
     N_ITERATIONS = 5  # Number of deposits
-    TIME_BETWEEN_DEPOSITS = TWAP_WINDOW // N_ITERATIONS  # Time between each deposit
+    TIME_BETWEEN_DEPOSITS = (
+        TWAP_WINDOW // N_ITERATIONS
+    )  # Time between each deposit
 
     # Store the staked supply rates after each snapshot
     staked_supply_rates = []
@@ -95,7 +101,7 @@ def test_twap_multiple_deposits(vault, crvusd, rewards_handler, lens, vault_god)
         rewards_handler.take_snapshot()
 
         # Retrieve the staked_supply_rate from the most recent snapshot
-        rate, ts = rewards_handler.get_snapshot(i)
+        rate, ts = rewards_handler.snapshots(i)
         staked_supply_rates.append(rate)
         timestamps.append(ts)
 
@@ -123,7 +129,8 @@ def test_twap_multiple_deposits(vault, crvusd, rewards_handler, lens, vault_god)
         # Calculate the time delta between the two snapshots
         time_delta = next_timestamp - current_timestamp
 
-        # Apply the trapezoidal rule: average of current and next rate, weighted by the time delta
+        # Apply the trapezoidal rule: average of current and next rate,
+        # weighted by the time delta
         trapezoidal_rate = (current_rate + next_rate) // 2
 
         # Accumulate the weighted staked supply rate and total time
@@ -136,11 +143,13 @@ def test_twap_multiple_deposits(vault, crvusd, rewards_handler, lens, vault_god)
         last_timestamp = timestamps[-1]
         time_delta = boa.env.evm.patch.timestamp - last_timestamp
 
-        # For the last period, we assume the rate stays constant up to the current time
+        # For the last period, we assume the rate stays constant
+        # up to the current time
         total_weighted_staked_supply_rate += last_rate * time_delta
         total_time += time_delta
 
-    # Compute the expected TWAP based on a simple average of staked_supply_rates
+    # Compute the expected TWAP based on a simple average of
+    # staked_supply_rates
     expected_twap = total_weighted_staked_supply_rate // total_time
 
     # Get the TWAP from the contract
@@ -154,5 +163,9 @@ def test_twap_multiple_deposits(vault, crvusd, rewards_handler, lens, vault_god)
     print(f"Staked rate: {staked_rate}, Contract TWAP: {twap}")
 
     # Compare the TWAP from the contract against the expected values
-    assert twap <= staked_rate, "TWAP is unexpectedly higher than the staked rate"
-    assert twap == expected_twap, f"TWAP {twap} does not match expected {expected_twap}"
+    assert (
+        twap <= staked_rate
+    ), "TWAP is unexpectedly higher than the staked rate"
+    assert (
+        twap == expected_twap
+    ), f"TWAP {twap} does not match expected {expected_twap}"
