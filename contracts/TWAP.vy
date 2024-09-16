@@ -73,34 +73,32 @@ def compute() -> uint256:
     for i: uint256 in range(0, num_snapshots, bound=MAX_SNAPSHOTS):  # i from 0 to num_snapshots - 1
         i_backwards: uint256 = num_snapshots - 1 - i
         current_snapshot: Snapshot = self.snapshots[i_backwards]
+        next_snapshot: Snapshot = current_snapshot
+        if i != 0:  # If not the first iteration, get the next snapshot
+            next_snapshot = self.snapshots[i_backwards + 1]
+
 
         # Figure out snapshot interval wrt current time (Now) and time_window_start
         # Time Axis (Increasing to the Right) --->
         # |---------|---------|---------|---------|------------------------|---------|---------|
         # t0        t1   time_window_start        interval_start           interval_end       Now
-
-        # Determine interval start
         interval_start: uint256 = current_snapshot.timestamp
         # Adjust interval start if it is before the time window start
         if interval_start < time_window_start:
             interval_start = time_window_start
 
         interval_end: uint256 = 0
-        next_snapshot: Snapshot = current_snapshot
         if i == 0:  # First iteration - we are on the last snapshot (i_backwards = num_snapshots - 1)
             # For the last snapshot, interval end is current_time
             interval_end = current_time
-            # Set next_snapshot to current_snapshot for the last snapshot
-            # next_snapshot = current_snapshot (already initialized as current_snapshot)
         else:
             # For other snapshots, interval end is the timestamp of the next snapshot
-            interval_end = self.snapshots[i_backwards + 1].timestamp
-            # Set next_snapshot to the next snapshot
-            next_snapshot = self.snapshots[i_backwards + 1]
+            interval_end = next_snapshot.timestamp
 
         if interval_end <= time_window_start:
             break
 
+        # Time inteval length
         time_delta: uint256 = interval_end - interval_start
 
         # Interpolation using the trapezoidal rule
@@ -109,11 +107,10 @@ def compute() -> uint256:
         ) // 2
 
         # Accumulate weighted rate and time
-        weighted_staked_supply_rate: uint256 = average_staked_supply_rate * time_delta
-        total_weighted_staked_supply_rate += weighted_staked_supply_rate
+        total_weighted_staked_supply_rate += average_staked_supply_rate * time_delta
         total_time += time_delta
 
-    assert total_time > 0, "Edge case: total_time is zero"
+    assert total_time > 0, "No snapshots taken!"
     twap: uint256 = total_weighted_staked_supply_rate // total_time
 
     return twap
