@@ -1,0 +1,13 @@
+import IController
+
+
+@external
+@view
+def controllers(i: uint256) -> IController:
+    ...
+
+
+@external
+@view
+def n_collaterals() -> uint256:
+    ...
