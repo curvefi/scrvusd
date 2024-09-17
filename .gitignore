@@ -1,2 +1,53 @@
-.idea
-__pycache__
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+*.egg
+*.wheel
+MANIFEST
+
+# Unit test / coverage reports
+.tox/
+.nox/
+.coverage
+coverage.xml
+*.cover
+*.py,cover
+.pytest_cache/
+htmlcov/
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# Pyre type checker
+.pyre/
+
+# macOS specific files
+.DS_Store
+
+# IDE files
+.idea/
+.vscode/
+
+# Log files
+*.log
+
+# Temporary files
+*.tmp
+*.swp
