@@ -11,7 +11,7 @@
 - Functions:
   - `store_snapshot`: Internal function to store a new snapshot of the tracked value if the minimum time interval has passed.
         !!!Wrapper must be implemented in importing contract.
-  - `compute`: External view function that calculates and returns the TWA based on the stored snapshots.
+  - `compute_twa`: External view function that calculates and returns the TWA based on the stored snapshots.
   - `get_len_snapshots`: External view function that returns the total number of snapshots stored.
 - **Usage**: Ideal for tracking metrics like staked supply rates, token prices, or any other value that changes over time and requires averaging over a period.
 """
@@ -117,14 +117,14 @@ def _compute() -> uint256:
 
         time_delta: uint256 = interval_end - interval_start
 
-        # Interpolation using the trapezoidal rule (bump precision here)
-        averaged_tracked_value: uint256 = 10**18 * (current_snapshot.tracked_value + next_snapshot.tracked_value) // 2
+        # Interpolation using the trapezoidal rule
+        averaged_tracked_value: uint256 = (current_snapshot.tracked_value + next_snapshot.tracked_value) // 2
 
         # Accumulate weighted rate and time
         total_weighted_tracked_value += averaged_tracked_value * time_delta
         total_time += time_delta
 
     assert total_time > 0, "Zero total time!"
-    twa: uint256 = total_weighted_tracked_value // total_time // 10**18  # (dump precision here)
+    twa: uint256 = total_weighted_tracked_value // total_time
 
     return twa
