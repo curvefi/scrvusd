@@ -39,6 +39,7 @@ jobs:
         with:
           python-version: 3.12.6
           cache: 'poetry'
+      - run: poetry install
 
       - name: Run Tests
         env:
