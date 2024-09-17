@@ -9,7 +9,7 @@ def test_default_behavior(crvusd, vault, rewards_handler, lens, role_manager):
 
     print(vault.roles(rewards_handler))
 
-    vault.add_strategy(vault, sender=rewards_handler.address)
+    # vault.add_strategy(vault, sender=rewards_handler.address)
 
     rewards_handler.process_rewards()
 

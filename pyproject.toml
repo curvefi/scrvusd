@@ -4,6 +4,11 @@ version = "0.1.0"
 description = ""
 authors = ["Curve.fi"]
 readme = "README.md"
+package-mode = false
+
+[tool.black]
+line-length = 79
+target_version = ['py312']
 
 [tool.poetry.dependencies]
 python = "3.12.4"
@@ -15,6 +20,8 @@ snekmate = "0.1.0"
 pytest = "^8.2.2"
 pytest-xdist = "^3.6.1"
 mamushi = "0.0.4a1"
+pre-commit = "^3.8.0"
+black = "24.8.0"
 
 [tool.poetry.group.scripts.dependencies]
 tqdm = "^4.66.5"
