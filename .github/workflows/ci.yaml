@@ -39,11 +39,13 @@ jobs:
         with:
           python-version: 3.12.6
           cache: 'poetry'
-      - run: poetry install
-
+      - name: Install Requirements
+        run: |
+          poetry config virtualenvs.in-project true
+          poetry install
       - name: Run Tests
         env:
           ETH_RPC_URL: ${{ secrets.ETH_RPC_URL }}
           ETHERSCAN_API_KEY: ${{ secrets.ETHERSCAN_API_KEY }}
         run: |
-          poetry run pytest -n=auto
+          poetry run pytest -n auto
