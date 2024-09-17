@@ -51,5 +51,4 @@ jobs:
           ETH_RPC_URL: ${{ secrets.ETH_RPC_URL }}
           ETHERSCAN_API_KEY: ${{ secrets.ETHERSCAN_API_KEY }}
         run: |
-          source .venv/bin/activate
-          pytest --numprocesses=auto
+          poetry run pytest --numprocesses=auto
