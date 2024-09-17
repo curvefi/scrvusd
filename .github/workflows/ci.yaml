@@ -1,18 +1,51 @@
-name: pre-commit
+name: CI Workflow
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
 
+  # Linting with Pre-commit
   lint:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v3
 
-      - name: Setup Python 3.10.4
+      - name: Setup Python 3.12.4
         uses: actions/setup-python@v4
         with:
-          python-version: 3.10.4
+          python-version: 3.12.4
 
+      # Run pre-commit hooks (e.g., black, flake8, isort)
       - uses: pre-commit/action@v3.0.0
+
+
+  # Test runs
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Python 3.12.4
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.12.4
+          cache: 'poetry'
+
+      - name: Install Requirements
+        run: |
+          pip install poetry==1.8.1
+          poetry config virtualenvs.in-project true
+          poetry install
+
+      - name: Run Tests
+        env:
+          ETH_RPC_URL: ${{ secrets.ETH_RPC_URL }}
+          ETHERSCAN_API_KEY: ${{ secrets.ETHERSCAN_API_KEY }}
+        run: |
+          source .venv/bin/activate
+          pytest --numprocesses=auto
