@@ -2,7 +2,7 @@ import boa
 
 
 def test_boa_timemachine():
-    for i in range(10):
+    for i in range(11):
         current_timestamp = boa.env.evm.patch.timestamp
         boa.env.time_travel(blocks=1)
         assert boa.env.evm.patch.timestamp > current_timestamp
