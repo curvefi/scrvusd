@@ -14,6 +14,7 @@ target_version = ['py312']
 python = "^3.12.6"
 poetry = "^1.8.3"
 pytest = "^8.2.2"
+pytest-xdist = "^3.6.1"
 vyper = "0.4.0"
 titanoboa = { git = "https://github.com/vyperlang/titanoboa.git", branch = "master" }
 snekmate = "0.1.0"
