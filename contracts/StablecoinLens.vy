@@ -9,6 +9,8 @@ from interfaces import IMonetaryPolicy
 MAX_CONTROLLERS: constant(uint256) = 50000
 # bound from monetary policy
 MAX_PEG_KEEPERS: constant(uint256) = 1001
+# could have been any other controller
+WETH_CONTROLLER_IDX: constant(uint256) = 3
 
 # the crvusd controller factory
 factory: immutable(IControllerFactory)
