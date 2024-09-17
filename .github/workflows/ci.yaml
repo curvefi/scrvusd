@@ -30,15 +30,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      # install poetry to allow cacheing
-      - name: Install poetry
-        run: pipx install poetry
-
       - name: Setup Python 3.12.6
         uses: actions/setup-python@v5
         with:
           python-version: 3.12.6
-          cache: 'poetry'
 
       - name: Install Requirements
         run: |
@@ -51,4 +46,5 @@ jobs:
           ETH_RPC_URL: ${{ secrets.ETH_RPC_URL }}
           ETHERSCAN_API_KEY: ${{ secrets.ETHERSCAN_API_KEY }}
         run: |
-          poetry run pytest --numprocesses=auto
+          source .venv/bin/activate
+          pytest --numprocesses=auto
