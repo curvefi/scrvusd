@@ -11,8 +11,8 @@ line-length = 79
 target_version = ['py312']
 
 [tool.poetry.dependencies]
-python = "3.12.6"
-poetry = "1.8.1"
+python = "^3.12.6"
+poetry = "^1.8.3"
 vyper = "0.4.0"
 titanoboa = { git = "https://github.com/vyperlang/titanoboa.git", branch = "master" }
 snekmate = "0.1.0"
