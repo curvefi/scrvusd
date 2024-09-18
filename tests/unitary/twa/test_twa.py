@@ -66,9 +66,7 @@ def test_twa_two_deposits(vault, crvusd, rewards_handler, lens, vault_god):
     ), "TWA does not match expected deposit amount"
 
 
-def test_twa_multiple_deposits(
-    vault, crvusd, rewards_handler, lens, vault_god
-):
+def test_twa_multiple_deposits(vault, crvusd, rewards_handler, lens, vault_god):
     # Prepare Alice's balance
     alice = boa.env.generate_address()
     boa.deal(crvusd, alice, 100_000_000 * 10**18)
@@ -84,9 +82,7 @@ def test_twa_multiple_deposits(
     AMT_DEPOSIT = 10 * 10**18  # Amount to deposit per iteration
     TWA_WINDOW = rewards_handler.twa_window()  # TWA window (e.g., one week)
     N_ITERATIONS = 5  # Number of deposits
-    TIME_BETWEEN_DEPOSITS = (
-        TWA_WINDOW // N_ITERATIONS
-    )  # Time between each deposit
+    TIME_BETWEEN_DEPOSITS = TWA_WINDOW // N_ITERATIONS  # Time between each deposit
 
     # Store the staked supply rates after each snapshot
     staked_supply_rates = []
@@ -163,9 +159,5 @@ def test_twa_multiple_deposits(
     print(f"Staked rate: {staked_rate}, Contract TWA: {twa}")
 
     # Compare the TWA from the contract against the expected values
-    assert (
-        twa <= staked_rate
-    ), "TWA is unexpectedly higher than the staked rate"
-    assert (
-        twa == expected_twa
-    ), f"TWA {twa} does not match expected {expected_twa}"
+    assert twa <= staked_rate, "TWA is unexpectedly higher than the staked rate"
+    assert twa == expected_twa, f"TWA {twa} does not match expected {expected_twa}"

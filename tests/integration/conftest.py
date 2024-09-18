@@ -18,9 +18,7 @@ def forked_env(rpc_url):
 
 @pytest.fixture(scope="module")
 def controller_factory():
-    return boa.from_etherscan(
-        "0xC9332fdCB1C491Dcc683bAe86Fe3cb70360738BC", "controller_factory"
-    )
+    return boa.from_etherscan("0xC9332fdCB1C491Dcc683bAe86Fe3cb70360738BC", "controller_factory")
 
 
 @pytest.fixture(scope="module")
