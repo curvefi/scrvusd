@@ -31,6 +31,11 @@ from ethereum.ercs import IERC165
 from interfaces import IVault
 from interfaces import IControllerFactory
 
+# we use access control because we want
+# to have multiple addresses being able to
+# adjust the rate while only the dao
+# (which has the `DEFAULT_ADMIN_ROLE`)
+# can appoint `RATE_MANAGER`s
 from snekmate.auth import access_control
 
 import StablecoinLens as lens
