@@ -90,6 +90,7 @@ def __init__(
 
     access_control.__init__()
     access_control._set_role_admin(RATE_MANAGER, access_control.DEFAULT_ADMIN_ROLE)
+    # TODO maybe this is not necessary as the name suggests
     access_control._grant_role(access_control.DEFAULT_ADMIN_ROLE, admin)
     access_control._revoke_role(access_control.DEFAULT_ADMIN_ROLE, msg.sender)
 
@@ -143,6 +144,8 @@ def process_rewards():
     @notice Permissionless function that let anyone
     distribute rewards (if any) to the crvUSD vault.
     """
+
+    # TODO add a check here to prevent instant distribution
 
     # any crvUSD sent to this contract (usually
     # through the fee splitter, but could also
