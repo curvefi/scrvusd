@@ -22,8 +22,8 @@ def __init__(_factory: IControllerFactory):
 
 
 @view
-@external
-def circulating_supply() -> uint256:
+@internal
+def _circulating_supply() -> uint256:
     """
     @notice Compute the circulating supply for crvUSD, `totalSupply` is
         incorrect since it takes into account all minted crvUSD (i.e. flashloans)
@@ -66,3 +66,8 @@ def circulating_supply() -> uint256:
         circulating_supply += staticcall controller.total_debt()
 
     return circulating_supply
+
+@external
+@view
+def circulating_supply() -> uint256:
+    return self._circulating_supply()
