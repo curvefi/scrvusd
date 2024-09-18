@@ -33,6 +33,8 @@ def _circulating_supply() -> uint256:
         For this reason we read the list of peg keepers contained in
         the monetary policy returned by a controller in the factory.
         factory -> weth controller -> monetary policy -> peg keepers
+        This function is not exposed as external as it can be easily
+        manipulated and should not be used by third party contracts.
     """
 
     circulating_supply: uint256 = 0
@@ -66,8 +68,3 @@ def _circulating_supply() -> uint256:
         circulating_supply += staticcall controller.total_debt()
 
     return circulating_supply
-
-@external
-@view
-def circulating_supply() -> uint256:
-    return self._circulating_supply()
