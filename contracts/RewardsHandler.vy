@@ -233,6 +233,27 @@ def set_distribution_rate(new_profit_max_unlock_time: uint256):
     extcall vault.setProfitMaxUnlockTime(new_profit_max_unlock_time)
     extcall vault.process_report(self)
 
+@external
+def recover_erc20(token: IERC20, receiver: address):
+    """
+    @notice This is a helper function to let an admin
+    rescue funds sent by mistake to this contract.
+    crvUSD cannot be recovered as it's part of the core
+    logic of this contract.
+    """
+    access_control._check_role(RATE_MANAGER, msg.sender)
+
+    # if crvUSD was sent by accident to the contract
+    # the funds are lost and will be distributed as
+    # staking rewards on the next `process_rewards`
+    # call.
+    assert token != stablecoin
+
+    # when funds are recovered the whole balanced is sent
+    # to a trusted address.
+    balance_to_recover: uint256 = staticcall token.balanceOf(self)
+
+    assert extcall token.transfer(receiver, balance_to_recover, default_return_value=True)
 
 # TODO add recover erc20
 # TODO add an anti-snipe measure at construction
