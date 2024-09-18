@@ -4,7 +4,6 @@ version = "0.1.0"
 description = ""
 authors = ["Curve.fi"]
 readme = "README.md"
-package-mode = false
 
 [tool.black]
 line-length = 100
@@ -18,7 +17,7 @@ titanoboa = { git = "https://github.com/vyperlang/titanoboa.git", rev = "4768207
 snekmate = "0.1.0"
 
 [tool.poetry.group.dev.dependencies]
-mamushi = "0.0.4a1"
+mamushi = "0.0.4a3"
 pre-commit = "^3.8.0"
 black = "24.8.0"
 pytest = "^8.2.2"
