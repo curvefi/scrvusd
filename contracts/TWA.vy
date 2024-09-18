@@ -68,7 +68,7 @@ def compute_twa() -> uint256:
 
 
 @internal
-def adjust_twa_window(_new_window: uint256):
+def set_twa_window(_new_window: uint256):
     """
     @notice Adjusts the TWA window.
     @param _new_window The new TWA window in seconds.
@@ -78,7 +78,7 @@ def adjust_twa_window(_new_window: uint256):
 
 
 @internal
-def adjust_min_snapshot_dt_seconds(_new_dt_seconds: uint256):
+def set_min_snapshot_dt_seconds(_new_dt_seconds: uint256):
     """
     @notice Adjusts the minimum snapshot time interval.
     @param _new_dt_seconds The new minimum snapshot time interval in seconds.
