@@ -8,7 +8,7 @@ boa.set_etherscan(api_key=os.getenv("ETHERSCAN_API_KEY"))
 
 @pytest.fixture(scope="module")
 def rpc_url():
-    return os.getenv("RPC_URL") or "https://rpc.ankr.com/eth"
+    return os.getenv("ETH_RPC_URL") or "https://rpc.ankr.com/eth"
 
 
 @pytest.fixture(scope="module", autouse=True)
