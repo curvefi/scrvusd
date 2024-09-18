@@ -53,20 +53,20 @@ def supportsInterface(id: bytes4) -> bool:
 @external
 def adjust_twa_frequency(_min_snapshot_dt_seconds: uint256):
     access_control._check_role(RATE_ADMIN, msg.sender)
-    twa.min_snapshot_dt_seconds = _min_snapshot_dt_seconds
+    twa.adjust_min_snapshot_dt_seconds(_min_snapshot_dt_seconds)
 
 
 @external
 def adjust_twa_window(_twa_window: uint256):
     access_control._check_role(RATE_ADMIN, msg.sender)
-    twa.twa_window = _twa_window
+    twa.adjust_twa_window(_twa_window)
 
 
 @external
 @view
 def weight() -> uint256:
     # TODO - should implement lower bound for weight, otherwise will be close to 0 at init TVL
-    return twa._compute()
+    return twa.compute()
 
 
 @external

@@ -64,12 +64,32 @@ def compute_twa() -> uint256:
     """
     @notice External endpoint for _compute() function.
     """
-    return self._compute()
+    return self.compute()
+
+
+@internal
+def adjust_twa_window(_new_window: uint256):
+    """
+    @notice Adjusts the TWA window.
+    @param _new_window The new TWA window in seconds.
+    @dev Only callable by the importing contract.
+    """
+    self.twa_window = _new_window
+
+
+@internal
+def adjust_min_snapshot_dt_seconds(_new_dt_seconds: uint256):
+    """
+    @notice Adjusts the minimum snapshot time interval.
+    @param _new_dt_seconds The new minimum snapshot time interval in seconds.
+    @dev Only callable by the importing contract.
+    """
+    self.min_snapshot_dt_seconds = _new_dt_seconds
 
 
 @internal
 @view
-def _compute() -> uint256:
+def compute() -> uint256:
     """
     @notice Computes the TWA over the specified time window by iterating backwards over the snapshots.
     @return The TWA for tracked value over the self.twa_window (10**18 decimals precision).
@@ -92,13 +112,6 @@ def _compute() -> uint256:
         if i != 0:  # If not the first iteration, get the next snapshot
             next_snapshot = self.snapshots[i_backwards + 1]
 
-
-        # Time Axis (Increasing to the Right) --->
-        #                                        SNAPSHOT
-        # |---------|---------|---------|------------------------|---------|---------|
-        # t0   time_window_start        interval_start           interval_end        block.timestamp (Now)
-
-        # Figure out snapshot interval wrt current time (Now) and time_window_start
         interval_start: uint256 = current_snapshot.timestamp
         # Adjust interval start if it is before the time window start
         if interval_start < time_window_start:
