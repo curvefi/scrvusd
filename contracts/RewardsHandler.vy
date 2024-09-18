@@ -54,13 +54,14 @@ def __init__(
     _vault: IVault,
     minimum_weight: uint256,
     controller_factory: IControllerFactory,
+    admin: address
 ):
     lens.__init__(controller_factory)
 
-    # TODO check who has access to what at deployment time
     access_control.__init__()
-#     access_control.grant_role
-#     access_control.renounceRole(access_control.DEFAULT_ROLE_ADMIN, msg.sender)
+    access_control._set_role_admin(RATE_MANAGER, access_control.DEFAULT_ADMIN_ROLE)
+    access_control._grant_role(access_control.DEFAULT_ADMIN_ROLE, admin)
+    access_control._revoke_role(access_control.DEFAULT_ADMIN_ROLE, msg.sender)
 
     twa.__init__(
         WEEK,  # twa_window = 1 week
