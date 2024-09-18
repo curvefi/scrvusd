@@ -1,4 +1,15 @@
+# pragma version ~=0.4.0
+
+import IMonetaryPolicy
+
+
 @view
 @external
 def total_debt() -> uint256:
+    ...
+
+
+@view
+@external
+def monetary_policy() -> IMonetaryPolicy:
     ...

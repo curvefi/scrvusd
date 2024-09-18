@@ -1,0 +1,9 @@
+# pragma version ~=0.4.0
+
+import IPegKeeper
+
+
+@view
+@external
+def peg_keepers(i: uint256) -> IPegKeeper:
+    ...
