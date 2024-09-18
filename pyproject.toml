@@ -4,6 +4,7 @@ version = "0.1.0"
 description = ""
 authors = ["Curve.fi"]
 readme = "README.md"
+package-mode = false
 
 [tool.black]
 line-length = 100
