@@ -8,6 +8,16 @@ def yearn_gov():
 
 
 @pytest.fixture(scope="module")
+def curve_dao():
+    return boa.env.generate_address()
+
+
+@pytest.fixture(scope="module")
+def deployer():
+    return boa.env.generate_address()
+
+
+@pytest.fixture(scope="module")
 def vault_original():
     return boa.load("contracts/yearn/Vault.vy")
 
@@ -60,8 +70,9 @@ def vault_god(vault, role_manager):
 
 
 @pytest.fixture(scope="module")
-def rewards_handler(vault, crvusd, role_manager):
-    rh = boa.load("contracts/RewardsHandler.vy", crvusd, vault)
+def rewards_handler(vault, crvusd, role_manager, curve_dao, deployer):
+    with boa.env.prank(deployer):
+        rh = boa.load("contracts/RewardsHandler.vy", crvusd, vault, curve_dao)
 
     vault.set_role(rh, 2**11 | 2**5 | 2**0, sender=role_manager)
 

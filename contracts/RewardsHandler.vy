@@ -10,6 +10,7 @@ from snekmate.auth import access_control
 
 initializes: access_control
 
+
 import TWA as twa
 initializes: twa
 exports: (
@@ -17,6 +18,8 @@ exports: (
     twa.snapshots,
     twa.get_len_snapshots,
     twa.twa_window,
+    twa.min_snapshot_dt_seconds,
+    twa.last_snapshot_timestamp
 )
 
 RATE_ADMIN: public(constant(bytes32)) = keccak256("RATE_ADMIN")
@@ -31,19 +34,22 @@ lens: address
 
 
 @deploy
-def __init__(_stablecoin: address, _vault: address):
-    access_control.__init__()
+def __init__(_stablecoin: address, _vault: address, _dao: address):
     twa.__init__(WEEK, 1)  # twa_window = 1 week, min_snapshot_dt_seconds = 1 second (if 0, then spam is possible)
+
     stablecoin = _stablecoin
     vault = _vault
 
+    access_control.__init__()
+    access_control._grant_role(RATE_ADMIN, _dao)
+    access_control._revoke_role(empty(bytes32), msg.sender)
 
 @external
 def take_snapshot():
     total_supply: uint256 = staticcall ILens(self.lens).circulating_supply()
     supply_in_vault: uint256 = staticcall IERC20(stablecoin).balanceOf(vault)
     supply_ratio: uint256 = supply_in_vault * 10**18 // total_supply
-    twa.store_snapshot(supply_ratio)
+    twa._store_snapshot(supply_ratio)
 
 
 def supportsInterface(id: bytes4) -> bool:
@@ -53,20 +59,20 @@ def supportsInterface(id: bytes4) -> bool:
 @external
 def adjust_twa_frequency(_min_snapshot_dt_seconds: uint256):
     access_control._check_role(RATE_ADMIN, msg.sender)
-    twa.adjust_min_snapshot_dt_seconds(_min_snapshot_dt_seconds)
+    twa._adjust_min_snapshot_dt_seconds(_min_snapshot_dt_seconds)
 
 
 @external
 def adjust_twa_window(_twa_window: uint256):
     access_control._check_role(RATE_ADMIN, msg.sender)
-    twa.adjust_twa_window(_twa_window)
+    twa._adjust_twa_window(_twa_window)
 
 
 @external
 @view
 def weight() -> uint256:
     # TODO - should implement lower bound for weight, otherwise will be close to 0 at init TVL
-    return twa.compute()
+    return twa._compute()
 
 
 @external

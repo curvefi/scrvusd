@@ -1,11 +1,32 @@
 import boa
 
 
-def test_boa_timemachine():
-    for i in range(10):
-        current_timestamp = boa.env.evm.patch.timestamp
-        boa.env.time_travel(blocks=1)
-        assert boa.env.evm.patch.timestamp > current_timestamp
+def test_compute_twa_no_snapshots(rewards_handler, crvusd, vault, lens, vault_god):
+    # Prepare Alice's balance
+    alice = boa.env.generate_address()
+    boa.deal(crvusd, alice, 100_000_000 * 10**18)
+    crvusd.approve(vault.address, 2**256 - 1, sender=alice)
+
+    # Set up RewardsHandler
+    rewards_handler.eval(f"self.lens = {lens.address}")
+
+    # Set vault deposit limit
+    vault.set_deposit_limit(crvusd.balanceOf(alice), sender=vault_god)
+
+    # Deposit and take snapshots over time
+    AMT_DEPOSIT = 10 * 10**18
+    vault.deposit(AMT_DEPOSIT, alice, sender=alice)
+
+    assert rewards_handler.get_len_snapshots() == 0
+    twa = rewards_handler.compute_twa()
+    assert twa == 0, f"Expected TWA to be 0 when no snapshots, got {twa}"
+
+
+def test_one_deposit_boa(rewards_handler):
+    rewards_handler.eval("twa.twa_window = 1000")
+    rewards_handler.eval("twa._store_snapshot(100 * 10**18)")
+    boa.env.time_travel(seconds=2000)
+    assert rewards_handler.compute_twa() == 100 * 10**18
 
 
 def test_twa_one_deposit(vault, crvusd, rewards_handler, lens, vault_god):
@@ -30,9 +51,8 @@ def test_twa_one_deposit(vault, crvusd, rewards_handler, lens, vault_god):
 
     # Compute TWA
     twa = rewards_handler.compute_twa()
-    assert (
-        twa == AMT_DEPOSIT * 10**18 // lens.circulating_supply()
-    ), "TWA does not match expected deposit amount"
+    expected_twa = AMT_DEPOSIT * 10**18 // lens.circulating_supply()
+    assert twa == expected_twa, "TWA does not match expected amount"
 
 
 def test_twa_two_deposits(vault, crvusd, rewards_handler, lens, vault_god):
@@ -61,9 +81,8 @@ def test_twa_two_deposits(vault, crvusd, rewards_handler, lens, vault_god):
 
     # Compute TWA
     twa = rewards_handler.compute_twa()
-    assert (
-        twa == 1.5 * AMT_DEPOSIT * 10**18 // lens.circulating_supply()
-    ), "TWA does not match expected deposit amount"
+    expected_twa = 1.5 * AMT_DEPOSIT * 10**18 // lens.circulating_supply()
+    assert twa == expected_twa, "TWA does not match expected amount"
 
 
 def test_twa_multiple_deposits(vault, crvusd, rewards_handler, lens, vault_god):

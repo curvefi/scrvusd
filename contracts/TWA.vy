@@ -9,7 +9,7 @@
 - TWA Calculation: Computes the TWA by iterating over the stored snapshots in reverse chronological order.
     It uses the trapezoidal rule to calculate the weighted average of the tracked value over the specified time window (`twa_window`).
 - Functions:
-  - `store_snapshot`: Internal function to store a new snapshot of the tracked value if the minimum time interval has passed.
+  - `_store_snapshot`: Internal function to store a new snapshot of the tracked value if the minimum time interval has passed.
         !!!Wrapper must be implemented in importing contract.
   - `compute_twa`: External view function that calculates and returns the TWA based on the stored snapshots.
   - `get_len_snapshots`: External view function that returns the total number of snapshots stored.
@@ -36,7 +36,7 @@ def __init__(_twa_window: uint256, _min_snapshot_dt_seconds: uint256):
 
 
 @internal
-def store_snapshot(_value: uint256):
+def _store_snapshot(_value: uint256):
     """
     @notice Stores a snapshot of the tracked value.
     @param _value The value to store.
@@ -64,11 +64,11 @@ def compute_twa() -> uint256:
     """
     @notice External endpoint for _compute() function.
     """
-    return self.compute()
+    return self._compute()
 
 
 @internal
-def adjust_twa_window(_new_window: uint256):
+def _adjust_twa_window(_new_window: uint256):
     """
     @notice Adjusts the TWA window.
     @param _new_window The new TWA window in seconds.
@@ -78,7 +78,7 @@ def adjust_twa_window(_new_window: uint256):
 
 
 @internal
-def adjust_min_snapshot_dt_seconds(_new_dt_seconds: uint256):
+def _adjust_min_snapshot_dt_seconds(_new_dt_seconds: uint256):
     """
     @notice Adjusts the minimum snapshot time interval.
     @param _new_dt_seconds The new minimum snapshot time interval in seconds.
@@ -89,7 +89,7 @@ def adjust_min_snapshot_dt_seconds(_new_dt_seconds: uint256):
 
 @internal
 @view
-def compute() -> uint256:
+def _compute() -> uint256:
     """
     @notice Computes the TWA over the specified time window by iterating backwards over the snapshots.
     @return The TWA for tracked value over the self.twa_window (10**18 decimals precision).
