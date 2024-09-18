@@ -112,7 +112,6 @@ def weight() -> uint256:
 def process_rewards():
     available_balance: uint256 = staticcall stablecoin.balanceOf(self)
     extcall stablecoin.transfer(vault.address, available_balance)
-    extcall vault.setProfitMaxUnlockTime(WEEK)
     extcall vault.process_report(vault.address)
 
 
