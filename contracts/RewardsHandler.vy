@@ -1,5 +1,30 @@
 # pragma version ~=0.4
 
+"""
+@title Rewards Handler
+@notice A contract that helps distributing rewards for
+st-crvUSD, an ERC4626 vault for crvUSD.
+Any crvUSD token sent to this contract is considered donated
+as rewards for staker and will not be recoverable.
+This contract can receive funds to be distributed from
+the FeeSplitter (crvUSD borrow rates revenues) and
+potentially other sources as well.
+The amount of funds that this contract should receive from
+the fee splitter is determined by computing the
+time-weighted average of the vault balance over crvUSD
+circulating supply ratio.
+The contract handles the rewards in a permissionless
+manner, anyone can take snapshots of the TVL and
+distribute rewards.
+In case of manipulation of the time-weighted
+average, the contract allows trusted contracts given
+the role of `RATE_MANGER` to correct the distribution
+rate of the rewards.
+@license Copyright (c) Curve.Fi, 2020-2024 - all rights reserved
+@author curve.fi
+@custom:security security@curve.fi
+"""
+
 from ethereum.ercs import IERC20
 from ethereum.ercs import IERC165
 
@@ -202,3 +227,7 @@ def set_distribution_rate(new_profit_max_unlock_time: uint256):
 
     extcall vault.setProfitMaxUnlockTime(new_profit_max_unlock_time)
     extcall vault.process_report(self)
+
+
+# TODO add recover erc20
+# TODO add an anti-snipe measure at construction
