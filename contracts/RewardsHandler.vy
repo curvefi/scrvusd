@@ -70,6 +70,9 @@ def __init__(
     stablecoin = _stablecoin
     vault = _vault
 
+################################################################
+#                   PERMISSIONLESS FUNCTIONS                   #
+################################################################
 
 @external
 def take_snapshot():
@@ -98,6 +101,31 @@ def take_snapshot():
 
 
 @external
+def process_rewards():
+    """
+    @notice Permissionless function that let anyone
+    distribute rewards (if any) to the crvUSD vault.
+    """
+
+    # any crvUSD sent to this contract (usually
+    # through the fee splitter, but could also
+    # come from other sources) will be used as
+    # a reward for crvUSD stakers in the vault.
+    available_balance: uint256 = staticcall stablecoin.balanceOf(self)
+
+    # we distribute funds in 2 steps:
+    # 1. transfer the actual funds
+    extcall stablecoin.transfer(vault.address, available_balance)
+    # 2. start streaming the rewards to users
+    extcall vault.process_report(vault.address)
+
+
+################################################################
+#                         VIEW FUNCTIONS                       #
+################################################################
+
+
+@external
 @view
 def supportsInterface(interface_id: bytes4) -> bool:
     """
@@ -108,6 +136,30 @@ def supportsInterface(interface_id: bytes4) -> bool:
             implements the interface or not.
     """
     return interface_id in _SUPPORTED_INTERFACES
+
+
+@external
+@view
+def weight() -> uint256:
+    """
+    @notice this function is part of the dynamic weight
+        interface expected by the FeeSplitter to know
+        what percentage of funds should be sent for
+        rewards distribution to crvUSD stakerks.
+    @dev `minimum_weight` acts as a lower bound for
+        the percentage of rewards that should be
+        distributed to stakers. This is useful to
+        bootstrapping TVL by asking for more at the
+        beginning and can also be increased in the
+        future if someone tries to manipulate the
+        time-weighted average of the tvl ratio.
+    """
+    return max(twa.compute(), self.minimum_weight)
+
+
+################################################################
+#                         ADMIN FUNCTIONS                      #
+################################################################
 
 
 @external
@@ -131,45 +183,6 @@ def set_twa_window(_twa_window: uint256):
     """
     access_control._check_role(RATE_MANAGER, msg.sender)
     twa.set_twa_window(_twa_window)
-
-
-@external
-@view
-def weight() -> uint256:
-    """
-    @notice this function is part of the dynamic weight
-        interface expected by the FeeSplitter to know
-        what percentage of funds should be sent for
-        rewards distribution to crvUSD stakerks.
-    @dev `minimum_weight` acts as a lower bound for
-        the percentage of rewards that should be
-        distributed to stakers. This is useful to
-        bootstrapping TVL by asking for more at the
-        beginning and can also be increased in the
-        future if someone tries to manipulate the
-        time-weighted average of the tvl ratio.
-    """
-    return max(twa.compute(), self.minimum_weight)
-
-
-@external
-def process_rewards():
-    """
-    @notice Permissionless function that let anyone
-    distribute rewards (if any) to the crvUSD vault.
-    """
-
-    # any crvUSD sent to this contract (usually
-    # through the fee splitter, but could also
-    # come from other sources) will be used as
-    # a reward for crvUSD stakers in the vault.
-    available_balance: uint256 = staticcall stablecoin.balanceOf(self)
-
-    # we distribute funds in 2 steps:
-    # 1. transfer the actual funds
-    extcall stablecoin.transfer(vault.address, available_balance)
-    # 2. start streaming the rewards to users
-    extcall vault.process_report(vault.address)
 
 
 @external
