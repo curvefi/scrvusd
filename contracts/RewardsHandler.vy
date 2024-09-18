@@ -113,6 +113,12 @@ def take_snapshot():
         in the vault. This is used to compute the
         time-weighted average of the TVL to decide
         on the amount of rewards to ask for (weight).
+    @dev There's no point in MEVing this snapshot as
+        the rewards distribution rate can always be
+        reduced (if a malicious actor inflates the
+        value of the snapshot) or the minimum amount
+        of rewards can always be increased (if a malicious
+        actor deflates the value of the snapshot).
     """
 
     # get the circulating supply from a helper function
@@ -255,5 +261,4 @@ def recover_erc20(token: IERC20, receiver: address):
 
     assert extcall token.transfer(receiver, balance_to_recover, default_return_value=True)
 
-# TODO add recover erc20
 # TODO add an anti-snipe measure at construction
