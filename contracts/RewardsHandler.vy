@@ -162,8 +162,9 @@ def process_rewards():
 
     # prevent the rewards from being distributed untill
     # the distribution rate has been set
-    if self.distribution_time == 0:
-        raise "rewards should be distributed over time"
+    assert (
+        self.distribution_time != 0
+    ), "rewards should be distributed over time"
 
 
     # any crvUSD sent to this contract (usually
