@@ -34,10 +34,6 @@ implements: IERC165
 # yearn vault's interface
 from interfaces import IVault
 
-# crvUSD controller factory interface
-# used to compute the circulating supply
-from interfaces import IControllerFactory
-
 # we use access control because we want
 # to have multiple addresses being able to
 # adjust the rate while only the dao
@@ -101,7 +97,7 @@ def __init__(
     _stablecoin: IERC20,
     _vault: IVault,
     minimum_weight: uint256,
-    controller_factory: IControllerFactory,
+    controller_factory: lens.IControllerFactory,
     admin: address,
 ):
     lens.__init__(controller_factory)
