@@ -89,7 +89,6 @@ def __init__(
     lens.__init__(controller_factory)
 
     access_control.__init__()
-    # TODO maybe this is not necessary as the name suggests
     access_control._grant_role(access_control.DEFAULT_ADMIN_ROLE, admin)
     access_control._grant_role(RATE_MANAGER, admin)
     access_control._revoke_role(access_control.DEFAULT_ADMIN_ROLE, msg.sender)
