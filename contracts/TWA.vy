@@ -35,19 +35,6 @@ def __init__(_twa_window: uint256, _min_snapshot_dt_seconds: uint256):
     self.min_snapshot_dt_seconds = _min_snapshot_dt_seconds  # >=1s to prevent spamming
 
 
-@internal
-def _store_snapshot(_value: uint256):
-    """
-    @notice Stores a snapshot of the tracked value.
-    @param _value The value to store.
-    """
-    if self.last_snapshot_timestamp + self.min_snapshot_dt_seconds <= block.timestamp:
-        self.last_snapshot_timestamp = block.timestamp
-        self.snapshots.append(
-            Snapshot(tracked_value=_value, timestamp=block.timestamp)
-        )  # store the snapshot into the DynArray
-
-
 @external
 @view
 def get_len_snapshots() -> uint256:
@@ -68,7 +55,21 @@ def compute_twa() -> uint256:
 
 
 @internal
-def _adjust_twa_window(_new_window: uint256):
+def _store_snapshot(_value: uint256):
+    """
+    @notice Stores a snapshot of the tracked value.
+    @param _value The value to store.
+    """
+    if self.last_snapshot_timestamp + self.min_snapshot_dt_seconds <= block.timestamp:
+        self.last_snapshot_timestamp = block.timestamp
+        self.snapshots.append(
+            Snapshot(tracked_value=_value, timestamp=block.timestamp)
+        )  # store the snapshot into the DynArray
+
+
+
+@internal
+def _set_twa_window(_new_window: uint256):
     """
     @notice Adjusts the TWA window.
     @param _new_window The new TWA window in seconds.
@@ -78,7 +79,7 @@ def _adjust_twa_window(_new_window: uint256):
 
 
 @internal
-def _adjust_min_snapshot_dt_seconds(_new_dt_seconds: uint256):
+def _set_min_snapshot_dt_seconds(_new_dt_seconds: uint256):
     """
     @notice Adjusts the minimum snapshot time interval.
     @param _new_dt_seconds The new minimum snapshot time interval in seconds.
