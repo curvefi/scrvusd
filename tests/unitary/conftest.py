@@ -52,13 +52,6 @@ def vault(vault_factory, crvusd, role_manager):
 
 
 @pytest.fixture(scope="module")
-def lens():
-    lens = boa.load("tests/mocks/MockLens.vy")
-    lens.eval("self.supply = 1_000_000_000 * 10 ** 18")
-    return lens
-
-
-@pytest.fixture(scope="module")
 def vault_god(vault, role_manager):
     _god = boa.env.generate_address()
 
@@ -68,9 +61,28 @@ def vault_god(vault, role_manager):
 
 
 @pytest.fixture(scope="module")
-def rewards_handler(vault, crvusd, role_manager, curve_dao, deployer):
-    with boa.env.prank(deployer):
-        rh = boa.load("contracts/RewardsHandler.vy", crvusd, vault, curve_dao)
+def lens():
+    lens = boa.load("tests/mocks/MockLens.vy")
+    lens.eval("self.supply = 1_000_000_000 * 10 ** 18")
+    return lens
+
+
+@pytest.fixture(params=[10**17, 5 * 10**17], scope="module")
+def minimum_weight(request):
+    # TODO probably want to do some stateful testing here
+    return request.param
+
+
+@pytest.fixture(scope="module")
+def controller_factory():
+    return boa.load("tests/mocks/MockControllerFactory.vy")
+
+
+@pytest.fixture(scope="module")
+def rewards_handler(vault, crvusd, role_manager, minimum_weight, controller_factory, curve_dao):
+    rh = boa.load(
+        "contracts/RewardsHandler.vy", crvusd, vault, minimum_weight, controller_factory, curve_dao
+    )
 
     vault.set_role(rh, 2**11 | 2**5 | 2**0, sender=role_manager)
 

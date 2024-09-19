@@ -3,7 +3,8 @@
 """
 @title Rewards Handler
 @notice A contract that helps distributing rewards for
-st-crvUSD, an ERC4626 vault for crvUSD.
+st-crvUSD, an ERC4626 vault for crvUSD (yearn's vault
+v3 multi-vault implementaiton is used).
 Any crvUSD token sent to this contract is considered donated
 as rewards for staker and will not be recoverable.
 This contract can receive funds to be distributed from
@@ -28,7 +29,13 @@ rate of the rewards.
 from ethereum.ercs import IERC20
 from ethereum.ercs import IERC165
 
+implements: IERC165
+
+# yearn vault's interface
 from interfaces import IVault
+
+# crvUSD controller factory interface
+# used to compute the circulating supply
 from interfaces import IControllerFactory
 
 # we use access control because we want
@@ -38,10 +45,13 @@ from interfaces import IControllerFactory
 # can appoint `RATE_MANAGER`s
 from snekmate.auth import access_control
 
+# import custom modules that contain
+# helper functions.
 import StablecoinLens as lens
+import TWA as twa
 
 initializes: access_control
-exports:(
+exports: (   
     # we don't expose `supportsInterface` from access control
     access_control.grantRole,
     access_control.revokeRole,
@@ -49,10 +59,11 @@ exports:(
     access_control.set_role_admin,
     access_control.DEFAULT_ADMIN_ROLE,
     access_control.hasRole,
-    access_control.getRoleAdmin
+    access_control.getRoleAdmin,
 )
 
-import TWA as twa
+initializes: lens
+
 initializes: twa
 exports: (
     twa.compute_twa,
@@ -60,11 +71,8 @@ exports: (
     twa.get_len_snapshots,
     twa.twa_window,
     twa.min_snapshot_dt_seconds,
-    twa.last_snapshot_timestamp
+    twa.last_snapshot_timestamp,
 )
-
-implements: IERC165
-initializes: lens
 
 RATE_MANAGER: public(constant(bytes32)) = keccak256("RATE_MANAGER")
 WEEK: constant(uint256) = 86400 * 7  # 7 days
@@ -78,7 +86,15 @@ _SUPPORTED_INTERFACES: constant(bytes4[3]) = [
 stablecoin: immutable(IERC20)
 vault: immutable(IVault)
 
+# the minimum amount of rewards requested
+# to the FeeSplitter
 minimum_weight: public(uint256)
+
+# the time over which rewards will be
+# distributed mirror of the  private
+# `profit_max_unlock_time` variable
+# from yearn vaults.
+distribution_time: public(uint256)
 
 
 @deploy
@@ -87,7 +103,7 @@ def __init__(
     _vault: IVault,
     minimum_weight: uint256,
     controller_factory: IControllerFactory,
-    admin: address
+    admin: address,
 ):
     lens.__init__(controller_factory)
 
@@ -103,6 +119,10 @@ def __init__(
 
     stablecoin = _stablecoin
     vault = _vault
+
+################################################################
+#                   PERMISSIONLESS FUNCTIONS                   #
+################################################################
 
 ################################################################
 #                   PERMISSIONLESS FUNCTIONS                   #
@@ -139,6 +159,10 @@ def take_snapshot():
 
     twa._store_snapshot(supply_ratio)
 
+    # get the circulating supply from a helper function
+    # (supply in circulation = controllers' debt + peg
+    # keppers' debt)
+    circulating_supply: uint256 = lens._circulating_supply()
 
 @external
 def process_rewards():
@@ -147,7 +171,12 @@ def process_rewards():
     distribute rewards (if any) to the crvUSD vault.
     """
 
-    # TODO add a check here to prevent instant distribution
+    # prevent the rewards from being distributed untill
+    # the distribution rate has been set
+    assert (
+        self.distribution_time != 0
+    ), "rewards should be distributed over time"
+
 
     # any crvUSD sent to this contract (usually
     # through the fee splitter, but could also
@@ -228,7 +257,7 @@ def set_twa_window(_twa_window: uint256):
 
 
 @external
-def set_distribution_rate(new_profit_max_unlock_time: uint256):
+def set_distribution_time(new_distribution_time: uint256):
     """
     @notice Admin function to correct the distribution
     rate of the rewards. Making this value lower will reduce
@@ -237,12 +266,21 @@ def set_distribution_rate(new_profit_max_unlock_time: uint256):
     distribute all the rewards.
     @dev This function can be used to prevent the rewards
     distribution from being manipulated (i.e. MEV twa
-    snapshots to obtain higher APR for the vault).
+    snapshots to obtain higher APR for the vault). Setting
+    this value to zero can be used to pause `process_rewards`.
     """
     access_control._check_role(RATE_MANAGER, msg.sender)
 
-    extcall vault.setProfitMaxUnlockTime(new_profit_max_unlock_time)
+    # we mirror the value of new_profit_max_unlock_time
+    # from the yearn vault since it's not exposed publicly.
+    self.distribution_time = new_distribution_time
+
+    # change the distribution time of the rewards in the vault
+    extcall vault.setProfitMaxUnlockTime(new_distribution_time)
+
+    # enact the changes
     extcall vault.process_report(self)
+
 
 @external
 def recover_erc20(token: IERC20, receiver: address):
@@ -264,6 +302,6 @@ def recover_erc20(token: IERC20, receiver: address):
     # to a trusted address.
     balance_to_recover: uint256 = staticcall token.balanceOf(self)
 
-    assert extcall token.transfer(receiver, balance_to_recover, default_return_value=True)
-
-# TODO add an anti-snipe measure at construction
+    assert extcall token.transfer(
+        receiver, balance_to_recover, default_return_value=True
+    )
