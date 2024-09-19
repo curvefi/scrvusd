@@ -41,7 +41,7 @@ from snekmate.auth import access_control
 import StablecoinLens as lens
 
 initializes: access_control
-exports:(     
+exports:(
     # we don't expose `supportsInterface` from access control
     access_control.grantRole,
     access_control.revokeRole,

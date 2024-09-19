@@ -54,9 +54,7 @@ def vault(vault_factory, crvusd, role_manager):
 @pytest.fixture(scope="module")
 def lens():
     lens = boa.load("tests/mocks/MockLens.vy")
-
     lens.eval("self.supply = 1_000_000_000 * 10 ** 18")
-
     return lens
 
 
