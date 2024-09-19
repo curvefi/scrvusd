@@ -29,7 +29,13 @@ rate of the rewards.
 from ethereum.ercs import IERC20
 from ethereum.ercs import IERC165
 
+implements: IERC165
+
+# yearn vault's interface
 from interfaces import IVault
+
+# crvUSD controller factory interface
+# used to compute the circulating supply
 from interfaces import IControllerFactory
 
 # we use access control because we want
@@ -39,12 +45,15 @@ from interfaces import IControllerFactory
 # can appoint `RATE_MANAGER`s
 from snekmate.auth import access_control
 
+# import custom modules that contain
+# helper functions.
 import StablecoinLens as lens
+import TWA as twa
 
 initializes: access_control
-
-import TWA as twa
 initializes: twa
+initializes: lens
+
 exports: (
     # TODO add missing getters
     twa.compute_twa,
@@ -60,9 +69,6 @@ exports: (
     access_control.hasRole,
     access_control.getRoleAdmin,
 )
-
-implements: IERC165
-initializes: lens
 
 RATE_MANAGER: public(constant(bytes32)) = keccak256("RATE_MANAGER")
 WEEK: constant(uint256) = 86400 * 7  # 7 days
