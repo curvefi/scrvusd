@@ -82,7 +82,15 @@ _SUPPORTED_INTERFACES: constant(bytes4[3]) = [
 stablecoin: immutable(IERC20)
 vault: immutable(IVault)
 
+# the minimum amount of rewards requested
+# to the FeeSplitter
 minimum_weight: public(uint256)
+
+# the time over which rewards will be
+# distributed mirror of the  private
+# `profit_max_unlock_time` variable
+# from yearn vaults.
+distribution_time: public(uint256)
 
 
 @deploy
@@ -152,7 +160,11 @@ def process_rewards():
     distribute rewards (if any) to the crvUSD vault.
     """
 
-    # TODO add a check here to prevent instant distribution
+    # prevent the rewards from being distributed untill
+    # the distribution rate has been set
+    if self.distribution_time == 0:
+        raise "rewards should be distributed over time"
+
 
     # any crvUSD sent to this contract (usually
     # through the fee splitter, but could also
@@ -233,7 +245,7 @@ def set_twa_window(_twa_window: uint256):
 
 
 @external
-def set_distribution_rate(new_profit_max_unlock_time: uint256):
+def set_distribution_time(new_distribution_time: uint256):
     """
     @notice Admin function to correct the distribution
     rate of the rewards. Making this value lower will reduce
@@ -242,11 +254,19 @@ def set_distribution_rate(new_profit_max_unlock_time: uint256):
     distribute all the rewards.
     @dev This function can be used to prevent the rewards
     distribution from being manipulated (i.e. MEV twa
-    snapshots to obtain higher APR for the vault).
+    snapshots to obtain higher APR for the vault). Setting
+    this value to zero can be used to pause `process_rewards`.
     """
     access_control._check_role(RATE_MANAGER, msg.sender)
 
-    extcall vault.setProfitMaxUnlockTime(new_profit_max_unlock_time)
+    # we mirror the value of new_profit_max_unlock_time
+    # from the yearn vault since it's not exposed publicly.
+    self.distribution_time = new_distribution_time
+
+    # change the distribution time of the rewards in the vault
+    extcall vault.setProfitMaxUnlockTime(new_distribution_time)
+
+    # enact the changes
     extcall vault.process_report(self)
 
 
@@ -270,7 +290,6 @@ def recover_erc20(token: IERC20, receiver: address):
     # to a trusted address.
     balance_to_recover: uint256 = staticcall token.balanceOf(self)
 
-# TODO add an anti-snipe measure at construction
     assert extcall token.transfer(
         receiver, balance_to_recover, default_return_value=True
     )
