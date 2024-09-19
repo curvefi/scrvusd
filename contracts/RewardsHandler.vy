@@ -51,7 +51,7 @@ import StablecoinLens as lens
 import TWA as twa
 
 initializes: access_control
-exports: (   
+exports: (
     # we don't expose `supportsInterface` from access control
     access_control.grantRole,
     access_control.revokeRole,
