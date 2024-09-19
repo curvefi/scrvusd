@@ -1,7 +1,7 @@
 import boa
 
 
-def test_min_snapshot_dt_enforcement(rewards_handler):
+def test_default_behavior(rewards_handler):
     # Set minimum snapshot interval to 100 seconds
     rewards_handler.eval("twa.min_snapshot_dt_seconds = 100")
 

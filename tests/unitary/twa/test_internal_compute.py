@@ -1,7 +1,7 @@
 import boa
 
 
-def test_compute_twa_no_snapshots(rewards_handler, crvusd, vault, vault_god):
+def test_default_behavior_compute_twa_no_snapshots(rewards_handler, crvusd, vault, vault_god):
     # Prepare Alice's balance
     alice = boa.env.generate_address()
     boa.deal(crvusd, alice, 100_000_000 * 10**18)
@@ -19,14 +19,14 @@ def test_compute_twa_no_snapshots(rewards_handler, crvusd, vault, vault_god):
     assert twa == 0, f"Expected TWA to be 0 when no snapshots, got {twa}"
 
 
-def test_one_deposit_boa(rewards_handler):
+def test_default_behavior_one_deposit_boa(rewards_handler):
     rewards_handler.eval("twa.twa_window = 1000")
     rewards_handler.eval("twa._store_snapshot(100 * 10**18)")
     boa.env.time_travel(seconds=2000)
     assert rewards_handler.compute_twa() == 100 * 10**18
 
 
-def test_many_deposits_boa(rewards_handler):
+def test_default_behavior_many_deposits_boa(rewards_handler):
     TWA_WINDOW = 1000
     rewards_handler.eval(f"twa.twa_window = {TWA_WINDOW}")
     N_ITER = 10
@@ -40,7 +40,7 @@ def test_many_deposits_boa(rewards_handler):
     assert rewards_handler.compute_twa() == snapshot_amount
 
 
-def test_twa_one_deposit(vault, crvusd, rewards_handler, vault_god):
+def test_default_behavior_twa_one_deposit(vault, crvusd, rewards_handler, vault_god):
     # Prepare Alice's balance
     alice = boa.env.generate_address()
     boa.deal(crvusd, alice, 100_000_000 * 10**18)
@@ -66,7 +66,7 @@ def test_twa_one_deposit(vault, crvusd, rewards_handler, vault_god):
     assert twa == expected_twa, "TWA does not match expected amount"
 
 
-def test_twa_trapezoid(vault, crvusd, rewards_handler, vault_god):
+def test_default_behavior_twa_trapezoid(vault, crvusd, rewards_handler, vault_god):
     # Prepare Alice's balance
     alice = boa.env.generate_address()
     boa.deal(crvusd, alice, 100_000_000 * 10**18)
@@ -95,7 +95,7 @@ def test_twa_trapezoid(vault, crvusd, rewards_handler, vault_god):
     assert twa == expected_twa, "TWA does not match expected amount"
 
 
-def test_twa_multiple_deposits(vault, crvusd, rewards_handler, vault_god):
+def test_default_behavior_twa_multiple_deposits(vault, crvusd, rewards_handler, vault_god):
     # Prepare Alice's balance
     alice = boa.env.generate_address()
     boa.deal(crvusd, alice, 100_000_000 * 10**18)
