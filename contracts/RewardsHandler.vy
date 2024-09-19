@@ -34,10 +34,6 @@ implements: IERC165
 # yearn vault's interface
 from interfaces import IVault
 
-# crvUSD controller factory interface
-# used to compute the circulating supply
-from interfaces import IControllerFactory
-
 # we use access control because we want
 # to have multiple addresses being able to
 # adjust the rate while only the dao
@@ -45,21 +41,8 @@ from interfaces import IControllerFactory
 # can appoint `RATE_MANAGER`s
 from snekmate.auth import access_control
 
-# import custom modules that contain
-# helper functions.
-import StablecoinLens as lens
-import TWA as twa
-
 initializes: access_control
-initializes: twa
-initializes: lens
-
 exports: (
-    # TODO add missing getters
-    twa.compute_twa,
-    twa.snapshots,
-    twa.get_len_snapshots,
-    twa.twa_window,
     # we don't expose `supportsInterface` from access control
     access_control.grantRole,
     access_control.revokeRole,
@@ -68,6 +51,22 @@ exports: (
     access_control.DEFAULT_ADMIN_ROLE,
     access_control.hasRole,
     access_control.getRoleAdmin,
+)
+
+# import custom modules that contain
+# helper functions.
+import StablecoinLens as lens
+initializes: lens
+
+import TWA as twa
+initializes: twa
+exports: (
+    twa.compute_twa,
+    twa.snapshots,
+    twa.get_len_snapshots,
+    twa.twa_window,
+    twa.min_snapshot_dt_seconds,
+    twa.last_snapshot_timestamp,
 )
 
 RATE_MANAGER: public(constant(bytes32)) = keccak256("RATE_MANAGER")
@@ -98,7 +97,7 @@ def __init__(
     _stablecoin: IERC20,
     _vault: IVault,
     minimum_weight: uint256,
-    controller_factory: IControllerFactory,
+    controller_factory: lens.IControllerFactory,
     admin: address,
 ):
     lens.__init__(controller_factory)
@@ -150,7 +149,7 @@ def take_snapshot():
 
     supply_ratio: uint256 = supply_in_vault * 10**18 // circulating_supply
 
-    twa.store_snapshot(supply_ratio)
+    twa._store_snapshot(supply_ratio)
 
 
 @external
@@ -162,9 +161,7 @@ def process_rewards():
 
     # prevent the rewards from being distributed untill
     # the distribution rate has been set
-    assert (
-        self.distribution_time != 0
-    ), "rewards should be distributed over time"
+    assert (self.distribution_time != 0), "rewards should be distributed over time"
 
 
     # any crvUSD sent to this contract (usually
@@ -214,7 +211,7 @@ def weight() -> uint256:
         future if someone tries to manipulate the
         time-weighted average of the tvl ratio.
     """
-    return max(twa.compute(), self.minimum_weight)
+    return max(twa._compute(), self.minimum_weight)
 
 
 ################################################################
@@ -223,7 +220,7 @@ def weight() -> uint256:
 
 
 @external
-def set_twa_frequency(_min_snapshot_dt_seconds: uint256):
+def set_twa_snapshot_dt(_min_snapshot_dt_seconds: uint256):
     """
     @notice Setter for the time-weighted average minimal
         frequency.
@@ -231,7 +228,7 @@ def set_twa_frequency(_min_snapshot_dt_seconds: uint256):
         time that should pass between two snapshots.
     """
     access_control._check_role(RATE_MANAGER, msg.sender)
-    twa.set_min_snapshot_dt_seconds(_min_snapshot_dt_seconds)
+    twa._set_snapshot_dt(_min_snapshot_dt_seconds)
 
 
 @external
@@ -242,7 +239,7 @@ def set_twa_window(_twa_window: uint256):
         the TWA value of the balance/supply ratio.
     """
     access_control._check_role(RATE_MANAGER, msg.sender)
-    twa.set_twa_window(_twa_window)
+    twa._set_twa_window(_twa_window)
 
 
 @external
@@ -291,6 +288,4 @@ def recover_erc20(token: IERC20, receiver: address):
     # to a trusted address.
     balance_to_recover: uint256 = staticcall token.balanceOf(self)
 
-    assert extcall token.transfer(
-        receiver, balance_to_recover, default_return_value=True
-    )
+    assert extcall token.transfer(receiver, balance_to_recover, default_return_value=True)
