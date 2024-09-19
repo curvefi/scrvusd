@@ -22,8 +22,8 @@ def __init__(_factory: IControllerFactory):
 
 
 @view
-@external
-def circulating_supply() -> uint256:
+@internal
+def _circulating_supply() -> uint256:
     """
     @notice Compute the circulating supply for crvUSD, `totalSupply` is
         incorrect since it takes into account all minted crvUSD (i.e. flashloans)
@@ -33,6 +33,8 @@ def circulating_supply() -> uint256:
         For this reason we read the list of peg keepers contained in
         the monetary policy returned by a controller in the factory.
         factory -> weth controller -> monetary policy -> peg keepers
+        This function is not exposed as external as it can be easily
+        manipulated and should not be used by third party contracts.
     """
 
     circulating_supply: uint256 = 0
@@ -40,7 +42,7 @@ def circulating_supply() -> uint256:
     # Fetch the weth controller (index 3) under the assumption that
     # weth will always be a valid collateral for crvUSD, therefore its
     # monetary policy should always be up to date.
-    controller: IController = staticcall factory.controllers(3)
+    controller: IController = staticcall factory.controllers(WETH_CONTROLLER_IDX)
 
     # We obtain the address of the current monetary policy used by the
     # weth controller because it contains a list of all the peg keepers.
