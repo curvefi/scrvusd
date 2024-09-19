@@ -5,9 +5,10 @@ from contracts.interfaces import IPegKeeper
 
 implements: IMonetaryPolicy
 
-peg_keeper: IPegKeeper
+peg_keeper_array: IPegKeeper[1000]
+
 
 @external
 @view
 def peg_keepers(i: uint256) -> IPegKeeper:
-    return self.peg_keeper
+    return self.peg_keeper_array[i]

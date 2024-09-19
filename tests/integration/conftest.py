@@ -13,7 +13,12 @@ def rpc_url():
 
 @pytest.fixture(scope="module", autouse=True)
 def forked_env(rpc_url):
-    boa.fork(rpc_url, block_identifier=18801970)
+    block_to_fork = 20742069
+    with boa.swap_env(boa.Env()):
+        boa.fork(url=rpc_url, block_identifier=block_to_fork)
+        print(f"\nForked the chain on block {boa.env.evm.vm.state.block_number}!")
+        boa.env.enable_fast_mode()
+        yield
 
 
 @pytest.fixture(scope="module")

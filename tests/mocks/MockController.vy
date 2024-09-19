@@ -8,6 +8,7 @@ implements: IController
 _monetary_policy: address
 total_debt: public(uint256)
 
+
 @external
 @view
 def monetary_policy() -> IMonetaryPolicy:

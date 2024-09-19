@@ -45,11 +45,6 @@ from interfaces import IControllerFactory
 # can appoint `RATE_MANAGER`s
 from snekmate.auth import access_control
 
-# import custom modules that contain
-# helper functions.
-import StablecoinLens as lens
-import TWA as twa
-
 initializes: access_control
 exports: (
     # we don't expose `supportsInterface` from access control
@@ -62,8 +57,12 @@ exports: (
     access_control.getRoleAdmin,
 )
 
+# import custom modules that contain
+# helper functions.
+import StablecoinLens as lens
 initializes: lens
 
+import TWA as twa
 initializes: twa
 exports: (
     twa.compute_twa,
@@ -120,6 +119,7 @@ def __init__(
     stablecoin = _stablecoin
     vault = _vault
 
+
 ################################################################
 #                   PERMISSIONLESS FUNCTIONS                   #
 ################################################################
@@ -159,10 +159,6 @@ def take_snapshot():
 
     twa._store_snapshot(supply_ratio)
 
-    # get the circulating supply from a helper function
-    # (supply in circulation = controllers' debt + peg
-    # keppers' debt)
-    circulating_supply: uint256 = lens._circulating_supply()
 
 @external
 def process_rewards():
@@ -173,9 +169,7 @@ def process_rewards():
 
     # prevent the rewards from being distributed untill
     # the distribution rate has been set
-    assert (
-        self.distribution_time != 0
-    ), "rewards should be distributed over time"
+    assert (self.distribution_time != 0), "rewards should be distributed over time"
 
 
     # any crvUSD sent to this contract (usually
@@ -302,6 +296,4 @@ def recover_erc20(token: IERC20, receiver: address):
     # to a trusted address.
     balance_to_recover: uint256 = staticcall token.balanceOf(self)
 
-    assert extcall token.transfer(
-        receiver, balance_to_recover, default_return_value=True
-    )
+    assert extcall token.transfer(receiver, balance_to_recover, default_return_value=True)

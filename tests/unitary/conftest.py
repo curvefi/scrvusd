@@ -1,6 +1,8 @@
 import boa
 import pytest
 
+MOCK_CRV_USD_CIRCULATING_SUPPLY = 69_420_000 * 10**18
+
 
 @pytest.fixture(scope="module")
 def yearn_gov():
@@ -60,13 +62,6 @@ def vault_god(vault, role_manager):
     return _god
 
 
-@pytest.fixture(scope="module")
-def lens():
-    lens = boa.load("tests/mocks/MockLens.vy")
-    lens.eval("self.supply = 1_000_000_000 * 10 ** 18")
-    return lens
-
-
 @pytest.fixture(params=[10**17, 5 * 10**17], scope="module")
 def minimum_weight(request):
     # TODO probably want to do some stateful testing here
@@ -74,14 +69,46 @@ def minimum_weight(request):
 
 
 @pytest.fixture(scope="module")
-def controller_factory():
-    return boa.load("tests/mocks/MockControllerFactory.vy")
+def mock_controller_factory(mock_controller):
+    mock_controller_factory = boa.load("tests/mocks/MockControllerFactory.vy")
+    for i in range(4):  # because we use 3rd controller (weth) in contract code
+        mock_controller_factory.eval(
+            f"self._controllers.append(IController({mock_controller.address}))"
+        )
+    return mock_controller_factory
 
 
 @pytest.fixture(scope="module")
-def rewards_handler(vault, crvusd, role_manager, minimum_weight, controller_factory, curve_dao):
+def mock_controller(mock_monetary_policy):
+    mock_controller = boa.load("tests/mocks/MockController.vy")
+    mock_controller.eval(f"self._monetary_policy={mock_monetary_policy.address}")
+    return mock_controller
+
+
+@pytest.fixture(scope="module")
+def mock_monetary_policy(mock_peg_keeper):
+    mock_monetary_policy = boa.load("tests/mocks/MockMonetaryPolicy.vy")
+    mock_monetary_policy.eval(f"self.peg_keeper_array[0] = IPegKeeper({mock_peg_keeper.address})")
+    return mock_monetary_policy
+
+
+@pytest.fixture(scope="module")
+def mock_peg_keeper():
+    mock_peg_keeper = boa.load("tests/mocks/MockPegKeeper.vy", MOCK_CRV_USD_CIRCULATING_SUPPLY)
+    return mock_peg_keeper
+
+
+@pytest.fixture(scope="module")
+def rewards_handler(
+    vault, crvusd, role_manager, minimum_weight, mock_controller_factory, curve_dao
+):
     rh = boa.load(
-        "contracts/RewardsHandler.vy", crvusd, vault, minimum_weight, controller_factory, curve_dao
+        "contracts/RewardsHandler.vy",
+        crvusd,
+        vault,
+        minimum_weight,
+        mock_controller_factory,
+        curve_dao,
     )
 
     vault.set_role(rh, 2**11 | 2**5 | 2**0, sender=role_manager)

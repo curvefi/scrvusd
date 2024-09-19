@@ -67,7 +67,6 @@ def _store_snapshot(_value: uint256):
         )  # store the snapshot into the DynArray
 
 
-
 @internal
 def _set_twa_window(_new_window: uint256):
     """
