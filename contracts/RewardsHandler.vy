@@ -91,7 +91,7 @@ def __init__(
     _vault: IVault,
     minimum_weight: uint256,
     controller_factory: IControllerFactory,
-    admin: address
+    admin: address,
 ):
     lens.__init__(controller_factory)
 
@@ -107,6 +107,7 @@ def __init__(
 
     stablecoin = _stablecoin
     vault = _vault
+
 
 ################################################################
 #                   PERMISSIONLESS FUNCTIONS                   #
@@ -248,6 +249,7 @@ def set_distribution_rate(new_profit_max_unlock_time: uint256):
     extcall vault.setProfitMaxUnlockTime(new_profit_max_unlock_time)
     extcall vault.process_report(self)
 
+
 @external
 def recover_erc20(token: IERC20, receiver: address):
     """
@@ -268,6 +270,7 @@ def recover_erc20(token: IERC20, receiver: address):
     # to a trusted address.
     balance_to_recover: uint256 = staticcall token.balanceOf(self)
 
-    assert extcall token.transfer(receiver, balance_to_recover, default_return_value=True)
-
 # TODO add an anti-snipe measure at construction
+    assert extcall token.transfer(
+        receiver, balance_to_recover, default_return_value=True
+    )
