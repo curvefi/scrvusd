@@ -3,7 +3,8 @@
 """
 @title Rewards Handler
 @notice A contract that helps distributing rewards for
-st-crvUSD, an ERC4626 vault for crvUSD.
+st-crvUSD, an ERC4626 vault for crvUSD (yearn's vault
+v3 multi-vault implementaiton is used).
 Any crvUSD token sent to this contract is considered donated
 as rewards for staker and will not be recoverable.
 This contract can receive funds to be distributed from
