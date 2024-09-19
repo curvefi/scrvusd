@@ -60,8 +60,26 @@ def vault_god(vault, role_manager):
 
 
 @pytest.fixture(scope="module")
-def rewards_handler(vault, crvusd, role_manager):
-    rh = boa.load("contracts/RewardsHandler.vy", crvusd, vault)
+def curve_dao():
+    return boa.env.generate_address()
+
+
+@pytest.fixture(params=[10**17, 5 * 10**17], scope="module")
+def minimum_weight(request):
+    # TODO probably want to do some stateful testing here
+    return request.param
+
+
+@pytest.fixture(scope="module")
+def controller_factory():
+    return boa.load("tests/mocks/MockControllerFactory.vy")
+
+
+@pytest.fixture(scope="module")
+def rewards_handler(vault, crvusd, role_manager, minimum_weight, controller_factory, curve_dao):
+    rh = boa.load(
+        "contracts/RewardsHandler.vy", crvusd, vault, minimum_weight, controller_factory, curve_dao
+    )
 
     vault.set_role(rh, 2**11 | 2**5 | 2**0, sender=role_manager)
 
