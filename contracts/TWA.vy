@@ -78,7 +78,7 @@ def _set_twa_window(_new_window: uint256):
 
 
 @internal
-def _set_min_snapshot_dt_seconds(_new_dt_seconds: uint256):
+def _set_snapshot_dt(_new_dt_seconds: uint256):
     """
     @notice Adjusts the minimum snapshot time interval.
     @param _new_dt_seconds The new minimum snapshot time interval in seconds.

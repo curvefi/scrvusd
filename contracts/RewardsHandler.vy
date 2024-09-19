@@ -220,7 +220,7 @@ def weight() -> uint256:
 
 
 @external
-def set_twa_frequency(_min_snapshot_dt_seconds: uint256):
+def set_twa_snapshot_dt(_min_snapshot_dt_seconds: uint256):
     """
     @notice Setter for the time-weighted average minimal
         frequency.
@@ -228,7 +228,7 @@ def set_twa_frequency(_min_snapshot_dt_seconds: uint256):
         time that should pass between two snapshots.
     """
     access_control._check_role(RATE_MANAGER, msg.sender)
-    twa._set_min_snapshot_dt_seconds(_min_snapshot_dt_seconds)
+    twa._set_snapshot_dt(_min_snapshot_dt_seconds)
 
 
 @external
