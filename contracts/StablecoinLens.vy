@@ -42,7 +42,7 @@ def _circulating_supply() -> uint256:
     # Fetch the weth controller (index 3) under the assumption that
     # weth will always be a valid collateral for crvUSD, therefore its
     # monetary policy should always be up to date.
-    controller: IController = staticcall factory.controllers(3)
+    controller: IController = staticcall factory.controllers(WETH_CONTROLLER_IDX)
 
     # We obtain the address of the current monetary policy used by the
     # weth controller because it contains a list of all the peg keepers.
