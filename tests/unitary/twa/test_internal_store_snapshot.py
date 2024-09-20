@@ -11,11 +11,9 @@ def test_add_single_snapshot(setup_rewards_handler, snapshot_amount):
     assert initial_len == 1, f"Expected 1 snapshot, got {initial_len}"
 
 
-def test_add_snapshot_before_min_interval(
-    setup_rewards_handler, snapshot_amount, snapshot_interval
-):
+def test_add_snapshot_before_min_interval(setup_rewards_handler, snapshot_amount):
     rewards_handler = setup_rewards_handler
-
+    snapshot_interval = rewards_handler.min_snapshot_dt_seconds()
     # Take a snapshot
     rewards_handler.eval(f"twa._store_snapshot({snapshot_amount})")
 
