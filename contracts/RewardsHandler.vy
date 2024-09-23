@@ -75,7 +75,7 @@ _SUPPORTED_INTERFACES: constant(bytes4[3]) = [
 ]
 
 stablecoin: immutable(IERC20)
-vault: immutable(IVault)
+vault: public(immutable(IVault))
 
 # the minimum amount of rewards requested to the FeeSplitter.
 minimum_weight: public(uint256)
