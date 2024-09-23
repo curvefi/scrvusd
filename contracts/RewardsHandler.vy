@@ -109,6 +109,8 @@ def __init__(
         1,  #  min_snapshot_dt_seconds = 1 second (if 0, then spam is possible)
     )
 
+    self._set_minimum_weight(minimum_weight)
+
     stablecoin = _stablecoin
     vault = _vault
 
