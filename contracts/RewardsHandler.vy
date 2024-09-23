@@ -66,6 +66,7 @@ exports: (
 
 RATE_MANAGER: public(constant(bytes32)) = keccak256("RATE_MANAGER")
 WEEK: constant(uint256) = 86400 * 7  # 7 days
+MAX_BPS: constant(uint256) = 10**4  # 100%
 
 _SUPPORTED_INTERFACES: constant(bytes4[3]) = [
     0x01FFC9A7,  # The ERC-165 identifier for ERC-165.
@@ -262,6 +263,8 @@ def set_minimum_weight(new_minimum_weight: uint256):
     determined by the twa of the staked supply ratio.
     """
     access_control._check_role(RATE_MANAGER, msg.sender)
+
+    assert new_minimum_weight <= MAX_BPS, "minimum weight should be <= 100%"
 
     self.minimum_weight = new_minimum_weight
 
