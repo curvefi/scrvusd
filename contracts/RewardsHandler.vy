@@ -282,7 +282,7 @@ def recover_erc20(token: IERC20, receiver: address):
     # the funds are lost and will be distributed as
     # staking rewards on the next `process_rewards`
     # call.
-    assert token != stablecoin
+    assert token != stablecoin, "can't recover crvusd"
 
     # when funds are recovered the whole balanced is sent
     # to a trusted address.
