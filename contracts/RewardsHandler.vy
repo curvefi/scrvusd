@@ -271,6 +271,19 @@ def set_distribution_time(new_distribution_time: uint256):
     # enact the changes
     extcall vault.process_report(self)
 
+@external
+def set_minimum_weight(new_minimum_weight: uint256):
+    """
+    @notice Update the minimum weight that the the vault will ask for.
+    @dev This function can be used to prevent the rewards requested from being
+    manipulated (i.e. MEV twa snapshots to obtain lower APR for the vault).
+    Setting this value to zero makes the amount of rewards requested fully
+    determined by the twa of the staked supply ratio.
+    """
+    access_control._check_role(RATE_MANAGER, msg.sender)
+
+    self.minimum_weight = new_minimum_weight
+
 
 @external
 def recover_erc20(token: IERC20, receiver: address):
