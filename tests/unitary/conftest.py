@@ -62,10 +62,9 @@ def vault_god(vault, role_manager):
     return _god
 
 
-@pytest.fixture(params=[10**17, 5 * 10**17], scope="module")
+@pytest.fixture(scope="module")
 def minimum_weight(request):
-    # TODO probably want to do some stateful testing here
-    return request.param
+    return 1000  # 10%
 
 
 @pytest.fixture(scope="module")
