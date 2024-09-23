@@ -1,19 +1,29 @@
 # pragma version ~=0.4
 
 """
-@title Time Weighted Average (TWA) Calculator Vyper Module
-@notice This contract stores snapshots of a tracked value at specific timestamps and computes the Time Weighted Average (TWA) over a defined time window.
+@title Time Weighted Average (TWA) Calculator Vyper Module @notice This contract
+stores snapshots of a tracked value at specific timestamps and computes the Time
+Weighted Average (TWA) over a defined time window.
+
 @dev
-- Snapshots Storage: Stores snapshots of a tracked value along with their timestamps in a dynamic array,
-    ensuring snapshots are only added if a minimum time interval (`min_snapshot_dt_seconds`) has passed since the last snapshot.
-- TWA Calculation: Computes the TWA by iterating over the stored snapshots in reverse chronological order.
-    It uses the trapezoidal rule to calculate the weighted average of the tracked value over the specified time window (`twa_window`).
+- Snapshots Storage: Stores snapshots of a tracked value along with their
+  timestamps in a dynamic array, ensuring snapshots are only added if a minimum
+  time interval (`min_snapshot_dt_seconds`) has passed since the last snapshot.
+- TWA Calculation: Computes the TWA by iterating over the stored snapshots in
+  reverse chronological order. It uses the trapezoidal rule to calculate the
+  weighted average of the tracked value over the specified time window
+  (`twa_window`).
 - Functions:
-  - `_store_snapshot`: Internal function to store a new snapshot of the tracked value if the minimum time interval has passed.
-        !!!Wrapper must be implemented in importing contract.
-  - `compute_twa`: External view function that calculates and returns the TWA based on the stored snapshots.
-  - `get_len_snapshots`: External view function that returns the total number of snapshots stored.
-- **Usage**: Ideal for tracking metrics like staked supply rates, token prices, or any other value that changes over time and requires averaging over a period.
+  - `_store_snapshot`: Internal function to store a new snapshot of the tracked
+    value if the minimum time interval has passed. !!!Wrapper must be
+    implemented in importing contract.
+  - `compute_twa`: External view function that calculates and returns the TWA
+    based on the stored snapshots.
+  - `get_len_snapshots`: External view function that returns the total number of
+    snapshots stored.
+- Usage: Ideal for tracking metrics like staked supply rates, token prices,
+  or any other value that changes over time and requires averaging over a
+  period.
 """
 
 MAX_SNAPSHOTS: constant(uint256) = 10**18  # 31.7 billion years if snapshot every second
