@@ -31,6 +31,10 @@ from ethereum.ercs import IERC165
 
 implements: IERC165
 
+from contracts.interfaces import IDynamicWeight
+
+implements: IDynamicWeight
+
 # yearn vault's interface
 from interfaces import IVault
 
