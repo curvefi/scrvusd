@@ -142,6 +142,7 @@ def take_snapshot():
 
     supply_ratio: uint256 = supply_in_vault * 10**18 // circulating_supply
 
+    # TODO rename to _take_snapshot
     twa._store_snapshot(supply_ratio)
 
 
@@ -252,7 +253,7 @@ def set_distribution_time(new_distribution_time: uint256):
     extcall vault.setProfitMaxUnlockTime(new_distribution_time)
 
     # enact the changes
-    extcall vault.process_report(self)
+    extcall vault.process_report(vault.address)
 
 
 @external
