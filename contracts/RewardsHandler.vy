@@ -263,9 +263,12 @@ def set_minimum_weight(new_minimum_weight: uint256):
     determined by the twa of the staked supply ratio.
     """
     access_control._check_role(RATE_MANAGER, msg.sender)
+    self._set_minimum_weight(new_minimum_weight)
 
+
+@internal
+def _set_minimum_weight(new_minimum_weight: uint256):
     assert new_minimum_weight <= MAX_BPS, "minimum weight should be <= 100%"
-
     self.minimum_weight = new_minimum_weight
 
 
