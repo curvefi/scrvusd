@@ -142,8 +142,7 @@ def take_snapshot():
 
     supply_ratio: uint256 = supply_in_vault * 10**18 // circulating_supply
 
-    # TODO rename to _take_snapshot
-    twa._store_snapshot(supply_ratio)
+    twa._take_snapshot(supply_ratio)
 
 
 @external
