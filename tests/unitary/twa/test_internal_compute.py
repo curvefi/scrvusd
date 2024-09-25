@@ -18,7 +18,7 @@ def test_default_behavior_one_deposit_boa(setup_rewards_handler, snapshot_amount
     rewards_handler = setup_rewards_handler
     twa_window = rewards_handler.twa_window()
 
-    rewards_handler.eval(f"twa._store_snapshot({snapshot_amount})")
+    rewards_handler.eval(f"twa._take_snapshot({snapshot_amount})")
     boa.env.time_travel(seconds=twa_window + 1)
     assert rewards_handler.compute_twa() == snapshot_amount
 
@@ -31,7 +31,7 @@ def test_default_behavior_many_deposits_boa(setup_rewards_handler):
     AMT_ADD = 10 * 10**18
     for i in range(N_ITER):
         snapshot_amount = AMT_ADD * (i + 1)  # simulate constant tvl growth
-        rewards_handler.eval(f"twa._store_snapshot({snapshot_amount})")
+        rewards_handler.eval(f"twa._take_snapshot({snapshot_amount})")
         boa.env.time_travel(seconds=twa_window // N_ITER)
     assert rewards_handler.compute_twa() < snapshot_amount
     boa.env.time_travel(seconds=twa_window)

@@ -65,7 +65,7 @@ def compute_twa() -> uint256:
 
 
 @internal
-def _store_snapshot(_value: uint256):
+def _take_snapshot(_value: uint256):
     """
     @notice Stores a snapshot of the tracked value.
     @param _value The value to store.

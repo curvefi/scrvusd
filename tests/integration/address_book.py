@@ -1,0 +1,3 @@
+# yearn vaults 3.0.3 factory
+factory = "0x5577EdcB8A856582297CdBbB07055E6a6E38eb5f"
+crvusd = "0xf939E0A03FB07F59A73314E73794Be0E57ac1b4E"
