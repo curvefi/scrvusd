@@ -6,7 +6,7 @@ Staking vault for crvUSD.
 
 The vault is an unmodified instance of a [Yearn v3 multi-strategy vault](https://github.com/yearn/yearn-vaults-v3) that accepts crvUSD deposits.
 
-This vault aims to be as cheap as possible for users to deposit and withdraw funds. For these reasons funds deposited in the vault are not moved anywhere and are always available to be redeemed.
+This vault aims to be as cheap as possible for users to deposit and withdraw funds. For this reason funds deposited in the vault are not moved anywhere and are always available to be redeemed.
 
 Although the vault is called "multi-strategy" it actually doesn't contain any strategies. This is possible thanks to yearn vaults' v3.0.3 ability to [report on self](https://github.com/yearn/yearn-vaults-v3/pull/205).
 
@@ -37,7 +37,7 @@ For instance if the time-weighed average of the ratio is 0.1 (10% of the circula
 
 The percentage of rewards that can be requested from the fee splitter has the following constraints:
 
-$$\text{minimum\_weight} \leq \text{weight} \leq \text{fee\_splitter\_cap}$$
+$$\text{minimum_weight} \leq \text{weight} \leq \text{fee_splitter_cap}$$
 
 - Upper bounded by whatever percentage cap the fee splitter has. (Controlled by the DAO)
 - Lower bounded by the `minimum_weight` parameter in the rewards handler. (Controlled by any `RATE_MANAGER` appointed by the DAO, or the DAO itself)
