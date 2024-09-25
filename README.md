@@ -37,7 +37,7 @@ For instance if the time-weighed average of the ratio is 0.1 (10% of the circula
 
 The percentage of rewards that can be requested from the fee splitter has the following constraints:
 
-$$\text{minimum_weight} \leq \text{weight} \leq \text{fee_splitter_cap}$$
+$$\text{minimum weight} \leq \text{weight} \leq \text{fee splitter cap}$$
 
 - Upper bounded by whatever percentage cap the fee splitter has. (Controlled by the DAO)
 - Lower bounded by the `minimum_weight` parameter in the rewards handler. (Controlled by any `RATE_MANAGER` appointed by the DAO, or the DAO itself)
