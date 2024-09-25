@@ -1,5 +1,6 @@
 import os
 
+import address_book as ab
 import boa
 import pytest
 
@@ -13,10 +14,9 @@ def rpc_url():
 
 @pytest.fixture(scope="module", autouse=True)
 def forked_env(rpc_url):
-    block_to_fork = 20742069
+    block_to_fork = 20826753
     with boa.swap_env(boa.Env()):
         boa.fork(url=rpc_url, block_identifier=block_to_fork)
-        print(f"\nForked the chain on block {boa.env.evm.vm.state.block_number}!")
         boa.env.enable_fast_mode()
         yield
 
@@ -29,3 +29,13 @@ def controller_factory():
 @pytest.fixture(scope="module")
 def lens(controller_factory):
     return boa.load("contracts/StablecoinLens.vy", controller_factory)
+
+
+@pytest.fixture(scope="module")
+def vault_factory():
+    return boa.from_etherscan("0x5577EdcB8A856582297CdBbB07055E6a6E38eb5f", "vault_factory")
+
+
+@pytest.fixture(scope="module")
+def crvusd():
+    return boa.from_etherscan(ab.crvusd, "crvusd")
