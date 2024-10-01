@@ -42,7 +42,7 @@ struct Snapshot:
 @deploy
 def __init__(_twa_window: uint256, _min_snapshot_dt_seconds: uint256):
     self.twa_window = _twa_window  # one week (in seconds)
-    self.min_snapshot_dt_seconds = _min_snapshot_dt_seconds  # >=1s to prevent spamming
+    self.min_snapshot_dt_seconds = max(1, _min_snapshot_dt_seconds)  # >=1s to prevent spamming
 
 
 @external
@@ -151,6 +151,10 @@ def _compute() -> uint256:
         # Accumulate weighted rate and time
         total_weighted_tracked_value += averaged_tracked_value * time_delta
         total_time += time_delta
+
+    if total_time == 0 and len(self.snapshots) == 1:
+        # case when only snapshot is taken in the block where computation is called
+        return self.snapshots[0].tracked_value
 
     assert total_time > 0, "Zero total time!"
     twa: uint256 = total_weighted_tracked_value // total_time

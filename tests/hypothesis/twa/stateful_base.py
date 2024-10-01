@@ -100,6 +100,10 @@ class TWAStatefulBase(RuleBasedStateMachine):
             total_weighted_tracked_value += averaged_tracked_value * time_delta
             total_time += time_delta
 
+        if total_time == 0 and len(self.snapshots) == 1:
+            # case when only snapshot is taken in the block where computation is called
+            return self.snapshots[0]["tracked_value"]
+
         # Ensure there is non-zero time for division
         if total_time == 0:
             raise ValueError("TWA: Zero total time!")
