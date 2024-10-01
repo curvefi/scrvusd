@@ -4,12 +4,12 @@ from hypothesis import Phase, Verbosity, settings
 settings.register_profile("debug", settings(verbosity=Verbosity.verbose, phases=list(Phase)[:4]))
 settings.load_profile("debug")
 
-TWA_PARALLEL_INSTANCES = 5
+TWA_PARALLEL_INSTANCES = 10
 
 
 @pytest.fixture()
 def twa_testcase_instance(request):
-    """Fixture to return a fresh instance of the state machine."""
+    """Fixture to return a fresh instance of the twa state machine."""
     from tests.hypothesis.twa.test_twa import TWAStateful
 
     return TWAStateful.TestCase()
