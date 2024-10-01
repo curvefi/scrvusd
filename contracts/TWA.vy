@@ -119,15 +119,20 @@ def _compute() -> uint256:
         i_backwards: uint256 = index_array_end - i
         current_snapshot: Snapshot = self.snapshots[i_backwards]
         next_snapshot: Snapshot = current_snapshot
-        if i != 0:  # If not the first iteration, get the next snapshot
+        if i != 0:  # If not the first iteration (last snapshot), get the next snapshot
             next_snapshot = self.snapshots[i_backwards + 1]
+
+        # Time Axis (Increasing to the Right) --->
+        #                                        SNAPSHOT
+        # |---------|---------|---------|------------------------|---------|---------|
+        # t0   time_window_start      interval_start        interval_end      block.timestamp (Now)
 
         interval_start: uint256 = current_snapshot.timestamp
         # Adjust interval start if it is before the time window start
         if interval_start < time_window_start:
             interval_start = time_window_start
 
-        interval_end: uint256 = 0
+        interval_end: uint256 = interval_start
         if i == 0:  # First iteration - we are on the last snapshot (i_backwards = num_snapshots - 1)
             # For the last snapshot, interval end is block.timestamp
             interval_end = block.timestamp
@@ -149,5 +154,4 @@ def _compute() -> uint256:
 
     assert total_time > 0, "Zero total time!"
     twa: uint256 = total_weighted_tracked_value // total_time
-
     return twa
