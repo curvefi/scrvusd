@@ -6,7 +6,11 @@ def test_add_single_snapshot(setup_rewards_handler, snapshot_amount):
 
     # Take a snapshot
     rewards_handler.eval(f"twa._take_snapshot({snapshot_amount})")
-
+    events = rewards_handler.get_logs()
+    assert (
+        f"SnapshotTaken(value={snapshot_amount}, timestamp={boa.env.evm.patch.timestamp}"
+        in repr(events)
+    )
     initial_len = rewards_handler.get_len_snapshots()
     assert initial_len == 1, f"Expected 1 snapshot, got {initial_len}"
 
