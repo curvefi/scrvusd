@@ -26,7 +26,35 @@ Weighted Average (TWA) over a defined time window.
   period.
 """
 
+
+################################################################
+#                            EVENTS                            #
+################################################################
+
+
+event SnapshotTaken:
+    value: uint256
+    timestamp: uint256
+
+event TWAWindowUpdated:
+    new_window: uint256
+
+event SnapshotIntervalUpdated:
+    new_dt_seconds: uint256
+
+
+################################################################
+#                           CONSTANTS                          #
+################################################################
+
+
 MAX_SNAPSHOTS: constant(uint256) = 10**18  # 31.7 billion years if snapshot every second
+
+
+################################################################
+#                            STORAGE                           #
+################################################################
+
 
 snapshots: public(DynArray[Snapshot, MAX_SNAPSHOTS])
 min_snapshot_dt_seconds: public(uint256)  # Minimum time between snapshots in seconds
@@ -39,10 +67,20 @@ struct Snapshot:
     timestamp: uint256
 
 
+################################################################
+#                          CONSTRUCTOR                         #
+################################################################
+
+
 @deploy
 def __init__(_twa_window: uint256, _min_snapshot_dt_seconds: uint256):
-    self.twa_window = _twa_window  # one week (in seconds)
-    self.min_snapshot_dt_seconds = _min_snapshot_dt_seconds  # >=1s to prevent spamming
+    self._set_twa_window(_twa_window)
+    self._set_snapshot_dt(_min_snapshot_dt_seconds)
+
+
+################################################################
+#                         VIEW FUNCTIONS                       #
+################################################################
 
 
 @external
@@ -64,6 +102,11 @@ def compute_twa() -> uint256:
     return self._compute()
 
 
+################################################################
+#                       INTERNAL FUNCTIONS                     #
+################################################################
+
+
 @internal
 def _take_snapshot(_value: uint256):
     """
@@ -75,7 +118,7 @@ def _take_snapshot(_value: uint256):
         self.snapshots.append(
             Snapshot(tracked_value=_value, timestamp=block.timestamp)
         )  # store the snapshot into the DynArray
-
+        log SnapshotTaken(_value, block.timestamp)
 
 @internal
 def _set_twa_window(_new_window: uint256):
@@ -85,6 +128,7 @@ def _set_twa_window(_new_window: uint256):
     @dev Only callable by the importing contract.
     """
     self.twa_window = _new_window
+    log TWAWindowUpdated(_new_window)
 
 
 @internal
@@ -95,7 +139,7 @@ def _set_snapshot_dt(_new_dt_seconds: uint256):
     @dev Only callable by the importing contract.
     """
     self.min_snapshot_dt_seconds = _new_dt_seconds
-
+    log SnapshotIntervalUpdated(_new_dt_seconds)
 
 @internal
 @view
