@@ -21,6 +21,12 @@ rate of the rewards.
 @custom:security security@curve.fi
 """
 
+
+################################################################
+#                           INTERFACES                         #
+################################################################
+
+
 from ethereum.ercs import IERC20
 from ethereum.ercs import IERC165
 
@@ -32,6 +38,12 @@ implements: IDynamicWeight
 
 # yearn vault's interface
 from interfaces import IVault
+
+
+################################################################
+#                            MODULES                           #
+################################################################
+
 
 # we use access control because we want to have multiple addresses being able
 # to adjust the rate while only the dao (which has the `DEFAULT_ADMIN_ROLE`)
@@ -64,6 +76,21 @@ exports: (
     twa.last_snapshot_timestamp,
 )
 
+
+################################################################
+#                            EVENTS                            #
+################################################################
+
+
+event MinimumWeightUpdated:
+    new_minimum_weight: uint256
+
+
+################################################################
+#                           CONSTANTS                          #
+################################################################
+
+
 RATE_MANAGER: public(constant(bytes32)) = keccak256("RATE_MANAGER")
 WEEK: constant(uint256) = 86400 * 7  # 7 days
 MAX_BPS: constant(uint256) = 10**4  # 100%
@@ -74,6 +101,12 @@ _SUPPORTED_INTERFACES: constant(bytes4[3]) = [
     0xA1AAB33F,  # The ERC-165 identifier for the dynamic weight interface.
 ]
 
+
+################################################################
+#                            STORAGE                           #
+################################################################
+
+
 stablecoin: immutable(IERC20)
 vault: public(immutable(IVault))
 
@@ -83,6 +116,11 @@ minimum_weight: public(uint256)
 # the time over which rewards will be distributed mirror of the private
 # `profit_max_unlock_time` variable from yearn vaults.
 distribution_time: public(uint256)
+
+
+################################################################
+#                          CONSTRUCTOR                         #
+################################################################
 
 
 @deploy
@@ -272,6 +310,8 @@ def set_minimum_weight(new_minimum_weight: uint256):
 def _set_minimum_weight(new_minimum_weight: uint256):
     assert new_minimum_weight <= MAX_BPS, "minimum weight should be <= 100%"
     self.minimum_weight = new_minimum_weight
+
+    log MinimumWeightUpdated(new_minimum_weight)
 
 
 @external

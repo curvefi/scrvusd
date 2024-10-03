@@ -3,6 +3,11 @@ import boa
 
 def test_default_behavior(rewards_handler, curve_dao):
     rewards_handler.set_minimum_weight(2000, sender=curve_dao)
+    events = rewards_handler.get_logs()
+
+    # Verify event emission
+    assert f"MinimumWeightUpdated(new_minimum_weight={2000}" in repr(events)
+
     assert rewards_handler.minimum_weight() == 2000
 
 
