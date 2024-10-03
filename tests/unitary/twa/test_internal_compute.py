@@ -51,7 +51,7 @@ def test_default_behavior_twa_one_deposit(setup_vault, setup_rewards_handler, al
     twa = rewards_handler.compute_twa()
 
     circulating_supply = rewards_handler.eval("lens._circulating_supply()")
-    expected_twa = amt_deposit * 10**18 // circulating_supply
+    expected_twa = amt_deposit * 10**4 // circulating_supply
 
     assert twa == expected_twa, "TWA does not match expected amount"
 
@@ -73,7 +73,7 @@ def test_default_behavior_twa_trapezoid(setup_vault, setup_rewards_handler, alic
     twa = rewards_handler.compute_twa()
     # 1.5 * AMT_DEPOSIT because we have two equal deposits and trapezoidal rule
     circulating_supply = rewards_handler.eval("lens._circulating_supply()")
-    expected_twa = 1.5 * amt_deposit * 10**18 // circulating_supply
+    expected_twa = 1.5 * amt_deposit * 10**4 // circulating_supply
     assert twa == expected_twa, "TWA does not match expected amount"
 
 
@@ -135,7 +135,7 @@ def test_default_behavior_twa_multiple_deposits(
 
     total_staked_amount = amt_deposit * N_ITER
     circulating_supply = rewards_handler.eval("lens._circulating_supply()")
-    staked_rate = total_staked_amount * 10**18 // circulating_supply
+    staked_rate = total_staked_amount * 10**4 // circulating_supply
 
     assert twa <= staked_rate, "TWA is unexpectedly higher than the staked rate"
     assert twa == expected_twa, f"TWA {twa} does not match expected {expected_twa}"

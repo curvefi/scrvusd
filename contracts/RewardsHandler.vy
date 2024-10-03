@@ -184,7 +184,9 @@ def take_snapshot():
     # rewards that are not yet distributed.
     supply_in_vault: uint256 = staticcall stablecoin.balanceOf(vault.address)
 
-    supply_ratio: uint256 = supply_in_vault * 10**18 // circulating_supply
+    # here we intentionally reduce the precision of the ratio because the
+    # dynamic weight interface expects a percentage in BPS.
+    supply_ratio: uint256 = supply_in_vault * MAX_BPS // circulating_supply
 
     twa._take_snapshot(supply_ratio)
 
