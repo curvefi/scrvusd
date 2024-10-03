@@ -3,19 +3,17 @@
 """
 @title Rewards Handler
 @notice A contract that helps distributing rewards for st-crvUSD, an ERC4626
-vault for crvUSD (yearn's vault v3 multi-vault implementaiton is used).
-Any crvUSD token sent to this contract is considered donated as rewards for
-staker and will not be recoverable.
-This contract can receive funds to be distributed from the FeeSplitter (crvUSD
-borrow rates revenues) and potentially other sources as well.
-The amount of funds that this contract should receive from the fee splitter is
-determined by computing the time-weighted average of the vault balance over
-crvUSD circulating supply ratio.
-The contract handles the rewards in a permissionless manner, anyone can take
-snapshots of the TVL and distribute rewards.
-In case of manipulation of the time-weighted average, the contract allows
-trusted contracts given the role of `RATE_MANGER` to correct the distribution
-rate of the rewards.
+vault for crvUSD (yearn's vault v3 multi-vault implementaiton is used). Any
+crvUSD token sent to this contract is considered donated as rewards for staker
+and will not be recoverable. This contract can receive funds to be distributed
+from the FeeSplitter (crvUSD borrow rates revenues) and potentially other
+sources as well. The amount of funds that this contract should receive from the
+fee splitter is determined by computing the time-weighted average of the vault
+balance over crvUSD circulating supply ratio. The contract handles the rewards
+in a permissionless manner, anyone can take snapshots of the TVL and distribute
+rewards. In case of manipulation of the time-weighted average, the contract
+allows trusted contracts given the role of `RATE_MANGER` to correct the
+distribution rate of the rewards.
 @license Copyright (c) Curve.Fi, 2020-2024 - all rights reserved
 @author curve.fi
 @custom:security security@curve.fi
@@ -160,13 +158,13 @@ def __init__(
 @external
 def take_snapshot():
     """
-    @notice Function that anyone can call to take a snapshot of the current
-    staked supply ratio in the vault. This is used to compute the time-weighted
-    average of the TVL to decide on the amount of rewards to ask for (weight).
-    @dev There's no point in MEVing this snapshot as the rewards distribution
-    rate can always be reduced (if a malicious actor inflates the value of the
-    snapshot) or the minimum amount of rewards can always be increased (if a
-    malicious actor deflates the value of the snapshot).
+    @notice Function that anyone can call to take a snapshot of the current staked
+    supply ratio in the vault. This is used to compute the time-weighted average of
+    the TVL to decide on the amount of rewards to ask for (weight).
+    @dev There's no point in MEVing this snapshot as the rewards distribution rate
+    can always be reduced (if a malicious actor inflates the value of the snapshot)
+    or the minimum amount of rewards can always be increased (if a malicious actor
+    deflates the value of the snapshot).
     """
 
     # get the circulating supply from a helper function.
@@ -186,8 +184,8 @@ def take_snapshot():
 @external
 def process_rewards():
     """
-    @notice Permissionless function that let anyone distribute rewards (if any)
-    to the crvUSD vault.
+    @notice Permissionless function that let anyone distribute rewards (if any) to
+    the crvUSD vault.
     """
 
     # prevent the rewards from being distributed untill the distribution rate
@@ -221,8 +219,8 @@ def supportsInterface(interface_id: bytes4) -> bool:
     @dev Returns `True` if this contract implements the interface defined by
     `interface_id`.
     @param interface_id The 4-byte interface identifier.
-    @return bool The verification whether the contract implements the
-    interface or not.
+    @return bool The verification whether the contract implements the interface or
+    not.
     """
     return interface_id in _SUPPORTED_INTERFACES
 
@@ -231,13 +229,14 @@ def supportsInterface(interface_id: bytes4) -> bool:
 @view
 def weight() -> uint256:
     """
-    @notice this function is part of the dynamic weight interface expected by
-    the FeeSplitter to know what percentage of funds should be sent for
-    rewards distribution to crvUSD stakerks.
-    @dev `minimum_weight` acts as a lower bound for the percentage of rewards
-    that should be distributed to stakers. This is useful to bootstrapping TVL
-    by asking for more at the beginning and can also be increased in the future
-    if someone tries to manipulate the time-weighted average of the tvl ratio.
+    @notice this function is part of the dynamic weight interface expected by the
+    FeeSplitter to know what percentage of funds should be sent for rewards
+    distribution to crvUSD stakerks.
+
+    @dev `minimum_weight` acts as a lower bound for the percentage of rewards that
+    should be distributed to stakers. This is useful to bootstrapping TVL by asking
+    for more at the beginning and can also be increased in the future if someone
+    tries to manipulate the time-weighted average of the tvl ratio.
     """
     return max(twa._compute(), self.minimum_weight)
 
@@ -272,13 +271,13 @@ def set_twa_window(_twa_window: uint256):
 @external
 def set_distribution_time(new_distribution_time: uint256):
     """
-    @notice Admin function to correct the distribution rate of the rewards.
-    Making this value lower will reduce the time it takes to stream the
-    rewards, making it longer will do the opposite. Setting it to 0 will
-    immediately distribute all the rewards.
-    @dev This function can be used to prevent the rewards distribution from
-    being manipulated (i.e. MEV twa snapshots to obtain higher APR for the
-    vault). Setting this value to zero can be used to pause `process_rewards`.
+    @notice Admin function to correct the distribution rate of the rewards. Making
+    this value lower will reduce the time it takes to stream the rewards, making it
+    longer will do the opposite. Setting it to 0 will immediately distribute all the
+    rewards.
+    @dev This function can be used to prevent the rewards distribution from being
+    manipulated (i.e. MEV twa snapshots to obtain higher APR for the vault). Setting
+    this value to zero can be used to pause `process_rewards`.
     """
     access_control._check_role(RATE_MANAGER, msg.sender)
 
@@ -298,9 +297,9 @@ def set_minimum_weight(new_minimum_weight: uint256):
     """
     @notice Update the minimum weight that the the vault will ask for.
     @dev This function can be used to prevent the rewards requested from being
-    manipulated (i.e. MEV twa snapshots to obtain lower APR for the vault).
-    Setting this value to zero makes the amount of rewards requested fully
-    determined by the twa of the staked supply ratio.
+    manipulated (i.e. MEV twa snapshots to obtain lower APR for the vault). Setting
+    this value to zero makes the amount of rewards requested fully determined by the
+    twa of the staked supply ratio.
     """
     access_control._check_role(RATE_MANAGER, msg.sender)
     self._set_minimum_weight(new_minimum_weight)
@@ -317,15 +316,14 @@ def _set_minimum_weight(new_minimum_weight: uint256):
 @external
 def recover_erc20(token: IERC20, receiver: address):
     """
-    @notice This is a helper function to let an admin rescue funds sent by
-    mistake to this contract. crvUSD cannot be recovered as it's part of the
-    core logic of this contract.
+    @notice This is a helper function to let an admin rescue funds sent by mistake
+    to this contract. crvUSD cannot be recovered as it's part of the core logic of
+    this contract.
     """
     access_control._check_role(RATE_MANAGER, msg.sender)
 
-    # if crvUSD was sent by accident to the contract the funds are lost and
-    # will be distributed as staking rewards on the next `process_rewards`
-    # call.
+    # if crvUSD was sent by accident to the contract the funds are lost and will
+    # be distributed as staking rewards on the next `process_rewards` call.
     assert token != stablecoin, "can't recover crvusd"
 
     # when funds are recovered the whole balanced is sent to a trusted address.
