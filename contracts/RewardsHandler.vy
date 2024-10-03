@@ -337,7 +337,7 @@ def set_scaling_factor(new_scaling_factor: uint256):
 def _set_scaling_factor(new_scaling_factor: uint256):
     self.scaling_factor = new_scaling_factor
 
-    log ScailingFactorUpdated(new_scaling_factor)
+    log ScalingFactorUpdated(new_scaling_factor)
 
 
 @external

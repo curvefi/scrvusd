@@ -68,6 +68,11 @@ def minimum_weight(request):
 
 
 @pytest.fixture(scope="module")
+def scaling_factor(request):
+    return 10000  # 100%
+
+
+@pytest.fixture(scope="module")
 def mock_controller_factory(mock_controller):
     mock_controller_factory = boa.load("tests/mocks/MockControllerFactory.vy")
     for i in range(4):  # because we use 3rd controller (weth) in contract code
@@ -99,13 +104,14 @@ def mock_peg_keeper():
 
 @pytest.fixture(scope="module")
 def rewards_handler(
-    vault, crvusd, role_manager, minimum_weight, mock_controller_factory, curve_dao
+    vault, crvusd, role_manager, minimum_weight, scaling_factor, mock_controller_factory, curve_dao
 ):
     rh = boa.load(
         "contracts/RewardsHandler.vy",
         crvusd,
         vault,
         minimum_weight,
+        scaling_factor,
         mock_controller_factory,
         curve_dao,
     )
