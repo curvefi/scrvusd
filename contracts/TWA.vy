@@ -1,29 +1,24 @@
 # pragma version ~=0.4
 
 """
-@title Time Weighted Average (TWA) Calculator Vyper Module @notice This contract
-stores snapshots of a tracked value at specific timestamps and computes the Time
-Weighted Average (TWA) over a defined time window.
+@title Time Weighted Average (TWA) Calculator
+
+@notice Stores value snapshots and computes the Time Weighted Average (TWA) over
+a specified time window.
 
 @dev
-- Snapshots Storage: Stores snapshots of a tracked value along with their
-  timestamps in a dynamic array, ensuring snapshots are only added if a minimum
-  time interval (`min_snapshot_dt_seconds`) has passed since the last snapshot.
-- TWA Calculation: Computes the TWA by iterating over the stored snapshots in
-  reverse chronological order. It uses the trapezoidal rule to calculate the
-  weighted average of the tracked value over the specified time window
-  (`twa_window`).
+- Stores value snapshots with timestamps in an array, only adding if the minimum
+  time interval (`min_snapshot_dt_seconds`) has passed.
+- Uses the trapezoidal rule to calculate the TWA over the `twa_window`.
 - Functions:
-  - `_store_snapshot`: Internal function to store a new snapshot of the tracked
-    value if the minimum time interval has passed. !!!Wrapper must be
-    implemented in importing contract.
-  - `compute_twa`: External view function that calculates and returns the TWA
-    based on the stored snapshots.
-  - `get_len_snapshots`: External view function that returns the total number of
-    snapshots stored.
-- Usage: Ideal for tracking metrics like staked supply rates, token prices,
-  or any other value that changes over time and requires averaging over a
-  period.
+  - `_store_snapshot`: Internal, adds a snapshot if the minimum interval passed.
+    Wrapper required in importing contract.
+  - `compute_twa`: Calculates and returns the TWA based on stored snapshots.
+  - `get_len_snapshots`: Returns the number of stored snapshots.
+
+@license Copyright (c) Curve.Fi, 2020-2024 - all rights reserved
+@author curve.fi
+@custom:security security@curve.fi
 """
 
 
