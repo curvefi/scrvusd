@@ -242,7 +242,6 @@ def weight() -> uint256:
     @notice this function is part of the dynamic weight interface expected by the
     FeeSplitter to know what percentage of funds should be sent for rewards
     distribution to crvUSD stakerks.
-
     @dev `minimum_weight` acts as a lower bound for the percentage of rewards that
     should be distributed to stakers. This is useful to bootstrapping TVL by asking
     for more at the beginning and can also be increased in the future if someone
