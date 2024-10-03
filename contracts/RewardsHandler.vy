@@ -83,6 +83,9 @@ exports: (
 event MinimumWeightUpdated:
     new_minimum_weight: uint256
 
+event ScalingFactorUpdated:
+    new_scaling_factor: uint256
+
 
 ################################################################
 #                           CONSTANTS                          #
@@ -108,6 +111,9 @@ _SUPPORTED_INTERFACES: constant(bytes4[3]) = [
 stablecoin: immutable(IERC20)
 vault: public(immutable(IVault))
 
+# scaling factor for the staked token / circulating supply ratio.
+scaling_factor: public(uint256)
+
 # the minimum amount of rewards requested to the FeeSplitter.
 minimum_weight: public(uint256)
 
@@ -126,6 +132,7 @@ def __init__(
     _stablecoin: IERC20,
     _vault: IVault,
     minimum_weight: uint256,
+    scaling_factor: uint256,
     controller_factory: lens.IControllerFactory,
     admin: address,
 ):
@@ -146,6 +153,7 @@ def __init__(
     )
 
     self._set_minimum_weight(minimum_weight)
+    self._set_scaling_factor(scaling_factor)
 
     stablecoin = _stablecoin
     vault = _vault
@@ -238,7 +246,7 @@ def weight() -> uint256:
     for more at the beginning and can also be increased in the future if someone
     tries to manipulate the time-weighted average of the tvl ratio.
     """
-    return max(twa._compute(), self.minimum_weight)
+    return max(twa._compute() * self.scaling_factor // MAX_BPS, self.minimum_weight)
 
 
 ################################################################
@@ -311,6 +319,23 @@ def _set_minimum_weight(new_minimum_weight: uint256):
     self.minimum_weight = new_minimum_weight
 
     log MinimumWeightUpdated(new_minimum_weight)
+
+
+@external
+def set_scaling_factor(new_scaling_factor: uint256):
+    """
+    @notice Update the scaling factor that is used in the weight calculation.
+    This factor can be used to adjust the rewards distribution rate.
+    """
+    access_control._check_role(RATE_MANAGER, msg.sender)
+    self._set_scaling_factor(new_scaling_factor)
+
+
+@internal
+def _set_scaling_factor(new_scaling_factor: uint256):
+    self.scaling_factor = new_scaling_factor
+
+    log ScailingFactorUpdated(new_scaling_factor)
 
 
 @external
