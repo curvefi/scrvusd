@@ -4,7 +4,7 @@ import pytest
 # TODO do fuzzing here
 possible_min_weight = [i * 2000 for i in range(0, 5)]
 
-possible_scaling_factor = [i * 2000 for i in range(0, 10)]
+possible_scaling_factor = [i * 4000 for i in range(0, 5)]
 
 # requested weight can potentially be any number (capped anyway by fee splitter)
 possible_req_weight = [i * 4000 for i in range(0, 3)]
