@@ -298,7 +298,7 @@ def set_distribution_time(new_distribution_time: uint256):
     extcall vault.setProfitMaxUnlockTime(new_distribution_time)
 
     # enact the changes
-    extcall vault.process_report(vault.address)
+    extcall vault.process_report(extcall vault.default_queue(0))
 
 
 @external
