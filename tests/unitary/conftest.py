@@ -46,7 +46,7 @@ def role_manager():
 
 
 @pytest.fixture(scope="module")
-def vault(vault_factory, crvusd, role_manager, dummy_strategy):
+def vault(vault_factory, crvusd, role_manager, accrual_strategy):
     vault_deployer = boa.load_partial("contracts/yearn/Vault.vy")
 
     address = vault_factory.deploy_new_vault(crvusd, "Staked crvUSD", "st-crvUSD", role_manager, 0)
@@ -58,7 +58,7 @@ def vault(vault_factory, crvusd, role_manager, dummy_strategy):
 
     vault.set_role(_god, int("11111111111111", 2), sender=role_manager)
 
-    vault.add_strategy(dummy_strategy, sender=_god)  # TODO figure out queue
+    vault.add_strategy(accrual_strategy, sender=_god)  # TODO figure out queue
 
     return vault
 
@@ -150,6 +150,6 @@ def tokenized_strategy(solc_args, vault_factory):
 
 
 @pytest.fixture(scope="module")
-def dummy_strategy(solc_args, crvusd, tokenized_strategy):
-    deployer = boa.load_partial_solc("contracts/yearn/DummyStrategy.sol", compiler_args=solc_args)
+def accrual_strategy(solc_args, crvusd, tokenized_strategy):
+    deployer = boa.load_partial_solc("contracts/yearn/AccrualStrategy.sol", compiler_args=solc_args)
     return deployer.deploy(crvusd.address, "dummy")
