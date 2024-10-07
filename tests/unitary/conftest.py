@@ -16,7 +16,7 @@ def curve_dao():
 
 
 @pytest.fixture(scope="module")
-def deployer():
+def dev_address():
     return boa.env.generate_address()
 
 
@@ -46,7 +46,7 @@ def role_manager():
 
 
 @pytest.fixture(scope="module")
-def vault(vault_factory, crvusd, role_manager, accrual_strategy):
+def vault(vault_factory, crvusd, role_manager, accrual_strategy, dev_address):
     vault_deployer = boa.load_partial("contracts/yearn/Vault.vy")
 
     address = vault_factory.deploy_new_vault(crvusd, "Staked crvUSD", "st-crvUSD", role_manager, 0)
@@ -59,7 +59,14 @@ def vault(vault_factory, crvusd, role_manager, accrual_strategy):
     vault.set_role(_god, int("11111111111111", 2), sender=role_manager)
 
     vault.add_strategy(accrual_strategy, sender=_god)  # TODO figure out queue
+    boa.deal(crvusd, dev_address, 1 * 10**18)
+    with boa.env.prank(dev_address):
+        crvusd.approve(vault, 1 * 10**18)
+        vault.set_deposit_limit(10_000_000 * 10**18, sender=_god)
+        vault.deposit(1 * 10**18, dev_address)
 
+    vault.update_max_debt_for_strategy(accrual_strategy, 1 * 10**18, sender=_god)
+    vault.update_debt(accrual_strategy, 1 * 10**18, sender=_god)
     return vault
 
 
@@ -114,19 +121,24 @@ def mock_peg_keeper():
 
 @pytest.fixture(scope="module")
 def rewards_handler(
-    vault, crvusd, role_manager, minimum_weight, scaling_factor, mock_controller_factory, curve_dao
+    vault,
+    crvusd,
+    role_manager,
+    minimum_weight,
+    scaling_factor,
+    mock_controller_factory,
+    curve_dao,
+    dev_address,
 ):
     print(crvusd, vault, minimum_weight, scaling_factor, mock_controller_factory, curve_dao)
-    rh = boa.load(
-        "contracts/RewardsHandler.vy",
-        crvusd,
-        vault,
-        minimum_weight,
-        scaling_factor,
-        mock_controller_factory,
-        curve_dao,
-    )
-    vault.set_role(rh, 2**11 | 2**5 | 2**0, sender=role_manager)
+    rewards_handler_deployer = boa.load_partial("contracts/RewardsHandler.vy")
+
+    with boa.env.prank(dev_address):
+        rh = rewards_handler_deployer(
+            crvusd, vault, minimum_weight, scaling_factor, mock_controller_factory, curve_dao
+        )
+
+    vault.set_role(rh, 2**11 | 2**6 | 2**5 | 2**0, sender=role_manager)
 
     return rh
 
@@ -140,16 +152,20 @@ def solc_args():
 
 
 @pytest.fixture(scope="module")
-def tokenized_strategy(solc_args, vault_factory):
+def tokenized_strategy(solc_args, vault_factory, dev_address):
     deployer = boa.load_partial_solc(
         "contracts/yearn/TokenizedStrategy.sol", compiler_args=solc_args
     )
-    return deployer.deploy(
-        vault_factory.address, override_address="0x2e234DAe75C793f67A35089C9d99245E1C58470b"
-    )
+    with boa.env.prank(dev_address):
+        tokenized_strategy = deployer.deploy(
+            vault_factory.address, override_address="0x2e234DAe75C793f67A35089C9d99245E1C58470b"
+        )
+    return tokenized_strategy
 
 
 @pytest.fixture(scope="module")
-def accrual_strategy(solc_args, crvusd, tokenized_strategy):
+def accrual_strategy(solc_args, crvusd, tokenized_strategy, dev_address):
     deployer = boa.load_partial_solc("contracts/yearn/AccrualStrategy.sol", compiler_args=solc_args)
-    return deployer.deploy(crvusd.address, "dummy")
+    with boa.env.prank(dev_address):
+        strategy = deployer.deploy(crvusd.address, "AccrualStrategy")
+    return strategy

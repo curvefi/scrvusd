@@ -5,7 +5,7 @@ def test_deposit(vault, crvusd, role_manager, vault_god):
     alice = boa.env.generate_address()
     boa.deal(crvusd, alice, 10_000 * 10**18)
 
-    vault.set_deposit_limit(10_000 * 10**18, sender=vault_god)
+    vault.set_deposit_limit(10_000_000 * 10**18, sender=vault_god)
 
     with boa.env.prank(alice):
         crvusd.approve(vault, 10_000 * 10**18)

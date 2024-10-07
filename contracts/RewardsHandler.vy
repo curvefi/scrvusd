@@ -34,8 +34,10 @@ from contracts.interfaces import IDynamicWeight
 
 implements: IDynamicWeight
 
-# yearn vault's interface
+# yearn interfaces
 from interfaces import IVault
+from interfaces import IStrategy
+
 
 
 ################################################################
@@ -154,7 +156,7 @@ def __init__(
 
     self._set_minimum_weight(minimum_weight)
     self._set_scaling_factor(scaling_factor)
-
+    self.distribution_time = WEEK
     stablecoin = _stablecoin
     vault = _vault
 
@@ -210,11 +212,15 @@ def process_rewards():
     # stakers in the vault.
     available_balance: uint256 = staticcall stablecoin.balanceOf(self)
 
+    # strategy to work with
+    strategy: IStrategy = IStrategy(staticcall vault.default_queue(0))
     # we distribute funds in 2 steps:
     # 1. transfer the actual funds
-    extcall stablecoin.transfer(vault.address, available_balance)
-    # 2. start streaming the rewards to users
-    extcall vault.process_report(vault.address)
+    extcall stablecoin.transfer(strategy.address, available_balance)
+    # 2. report on strategy
+    extcall strategy.report()
+    # 3. start streaming the rewards to users
+    extcall vault.process_report(strategy.address)
 
 
 ################################################################

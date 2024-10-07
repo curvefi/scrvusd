@@ -14,3 +14,7 @@ def process_report(strategy: address) -> (uint256, uint256):
 @external
 def default_queue(index: uint256) -> address:
     ...
+
+@external
+def update_debt(strategy: address, target_debt: uint256) -> uint256:
+    ...

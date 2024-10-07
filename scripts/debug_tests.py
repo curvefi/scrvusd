@@ -11,7 +11,7 @@ def main():
     # Pytest arguments
     pytest_args = [
         "-s",  # Do not capture output, allowing you to see print statements and debug info
-        "tests/unitary/twa",  # Specific test to run
+        "tests/unitary/yearn/test_rewards.py",  # Specific test to run
         # '--maxfail=1',  # Stop after the firstD failure
         "--tb=short",  # Shorter traceback for easier reading
         "-rA",  # Show extra test summary info

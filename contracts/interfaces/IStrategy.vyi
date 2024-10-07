@@ -1,0 +1,14 @@
+# pragma version ~=0.4
+
+@external
+def report() -> (uint256, uint256):
+    ...
+
+@external
+def setKeeper(_keeper: address):
+    ...
+
+@view
+@external
+def management() -> address:
+    ...
