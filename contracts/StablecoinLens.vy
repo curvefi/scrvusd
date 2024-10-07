@@ -25,16 +25,16 @@ def __init__(_factory: IControllerFactory):
 @internal
 def _circulating_supply() -> uint256:
     """
-    @notice Compute the circulating supply for crvUSD, `totalSupply` is
-        incorrect since it takes into account all minted crvUSD (i.e. flashloans)
-    @dev This function sacrifices some gas to fetch peg keepers from a
-        unique source of truth to avoid having to manually maintain multiple
-        lists across several contracts.
-        For this reason we read the list of peg keepers contained in
-        the monetary policy returned by a controller in the factory.
-        factory -> weth controller -> monetary policy -> peg keepers
-        This function is not exposed as external as it can be easily
-        manipulated and should not be used by third party contracts.
+    @notice Compute the circulating supply for crvUSD, `totalSupply` is incorrect
+    since it takes into account all minted crvUSD (i.e. flashloans)
+
+    @dev This function sacrifices some gas to fetch peg keepers from a unique source
+    of truth to avoid having to manually maintain multiple lists across several
+    contracts. For this reason we read the list of peg keepers contained in the
+    monetary policy returned by a controller in the factory. factory -> weth
+    controller -> monetary policy -> peg keepers This function is not exposed as
+    external as it can be easily manipulated and should not be used by third party
+    contracts.
     """
 
     circulating_supply: uint256 = 0
