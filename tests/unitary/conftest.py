@@ -1,4 +1,5 @@
 import boa
+import boa_solidity  # noqa: F401
 import pytest
 
 MOCK_CRV_USD_CIRCULATING_SUPPLY = 69_420_000 * 10**18
@@ -45,12 +46,21 @@ def role_manager():
 
 
 @pytest.fixture(scope="module")
-def vault(vault_factory, crvusd, role_manager):
+def vault(vault_factory, crvusd, role_manager, dummy_strategy):
     vault_deployer = boa.load_partial("contracts/yearn/Vault.vy")
 
     address = vault_factory.deploy_new_vault(crvusd, "Staked crvUSD", "st-crvUSD", role_manager, 0)
 
-    return vault_deployer.at(address)
+    vault = vault_deployer.at(address)
+
+    # creata a local god to avoid recursive dependencies in fixtures
+    _god = boa.env.generate_address()
+
+    vault.set_role(_god, int("11111111111111", 2), sender=role_manager)
+
+    vault.add_strategy(dummy_strategy, sender=_god)  # TODO figure out queue
+
+    return vault
 
 
 @pytest.fixture(scope="module")
@@ -106,6 +116,7 @@ def mock_peg_keeper():
 def rewards_handler(
     vault, crvusd, role_manager, minimum_weight, scaling_factor, mock_controller_factory, curve_dao
 ):
+    print(crvusd, vault, minimum_weight, scaling_factor, mock_controller_factory, curve_dao)
     rh = boa.load(
         "contracts/RewardsHandler.vy",
         crvusd,
@@ -115,7 +126,30 @@ def rewards_handler(
         mock_controller_factory,
         curve_dao,
     )
-
     vault.set_role(rh, 2**11 | 2**5 | 2**0, sender=role_manager)
 
     return rh
+
+
+@pytest.fixture(scope="module")
+def solc_args():
+    return {
+        "optimize": True,
+        "optimize_runs": 200,
+    }
+
+
+@pytest.fixture(scope="module")
+def tokenized_strategy(solc_args, vault_factory):
+    deployer = boa.load_partial_solc(
+        "contracts/yearn/TokenizedStrategy.sol", compiler_args=solc_args
+    )
+    return deployer.deploy(
+        vault_factory.address, override_address="0x2e234DAe75C793f67A35089C9d99245E1C58470b"
+    )
+
+
+@pytest.fixture(scope="module")
+def dummy_strategy(solc_args, crvusd, tokenized_strategy):
+    deployer = boa.load_partial_solc("contracts/yearn/DummyStrategy.sol", compiler_args=solc_args)
+    return deployer.deploy(crvusd.address, "dummy")

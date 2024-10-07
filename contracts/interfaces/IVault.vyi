@@ -9,3 +9,8 @@ def setProfitMaxUnlockTime(new_profit_max_unlock_time: uint256):
 @external
 def process_report(strategy: address) -> (uint256, uint256):
     ...
+
+@view
+@external
+def default_queue(index: uint256) -> address:
+    ...
