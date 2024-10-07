@@ -1,4 +1,5 @@
 import boa
+import boa_solidity  # noqa: F401
 import pytest
 
 MOCK_CRV_USD_CIRCULATING_SUPPLY = 69_420_000 * 10**18
@@ -119,3 +120,27 @@ def rewards_handler(
     vault.set_role(rh, 2**11 | 2**5 | 2**0, sender=role_manager)
 
     return rh
+
+
+@pytest.fixture(scope="module")
+def solc_args():
+    return {
+        "optimize": True,
+        "optimize_runs": 200,
+    }
+
+
+@pytest.fixture(scope="module")
+def tokenized_strategy(solc_args, vault_factory):
+    deployer = boa.load_partial_solc(
+        "contracts/yearn/TokenizedStrategy.sol", compiler_args=solc_args
+    )
+    return deployer.deploy(
+        vault_factory.address, override_address="0x2e234DAe75C793f67A35089C9d99245E1C58470b"
+    )
+
+
+@pytest.fixture(scope="module")
+def dummy_strategy(solc_args, crvusd, tokenized_strategy):
+    deployer = boa.load_partial_solc("contracts/yearn/DummyStrategy.sol", compiler_args=solc_args)
+    return deployer.deploy(crvusd.address, "dummy")
