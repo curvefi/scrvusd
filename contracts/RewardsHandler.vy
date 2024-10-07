@@ -194,7 +194,7 @@ def take_snapshot():
 
 
 @external
-def process_rewards():
+def process_rewards(update_debt: bool = True):
     """
     @notice Permissionless function that let anyone distribute rewards (if any) to
     the crvUSD vault.
@@ -221,6 +221,9 @@ def process_rewards():
     extcall strategy.report()
     # 3. start streaming the rewards to users
     extcall vault.process_report(strategy.address)
+    # # 4. update strategy debt
+    if update_debt:
+        extcall vault.update_debt(strategy.address, 10 ** 18)
 
 
 ################################################################
