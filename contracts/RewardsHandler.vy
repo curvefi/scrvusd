@@ -278,7 +278,7 @@ def set_twa_window(_twa_window: uint256):
 
 
 @external
-def set_distribution_time(new_distribution_time: uint256, enact_startegy: address = empty(address)):
+def set_distribution_time(new_distribution_time: uint256):
     """
     @notice Admin function to correct the distribution rate of the rewards. Making
     this value lower will reduce the time it takes to stream the rewards, making it
@@ -298,13 +298,7 @@ def set_distribution_time(new_distribution_time: uint256, enact_startegy: addres
     extcall vault.setProfitMaxUnlockTime(new_distribution_time)
 
     # enact the changes
-    if enact_startegy == empty(address):
-        # we apply the changes with first strategy in default queue
-        extcall vault.process_report(staticcall vault.default_queue(0))
-    else:
-        # or we use the specified strategy
-        extcall vault.process_report(enact_startegy)
-
+    extcall vault.process_report(staticcall vault.default_queue(0))
 
 @external
 def set_minimum_weight(new_minimum_weight: uint256):
