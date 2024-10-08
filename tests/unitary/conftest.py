@@ -180,4 +180,5 @@ def accrual_strategy_ext(accrual_strategy, dev_address):
     )
     with boa.env.prank(dev_address):
         accrual_strategy_extended_abi.setProfitMaxUnlockTime(0)
+        accrual_strategy_extended_abi.setPerformanceFee(0)
     return accrual_strategy_extended_abi

@@ -36,3 +36,7 @@ def profitMaxUnlockTime() -> uint256:
 @external
 def setProfitMaxUnlockTime(_profitMaxUnlockTime: uint256):
     ...
+
+@external
+def setPerformanceFee(_performanceFee: uint16):
+    ...

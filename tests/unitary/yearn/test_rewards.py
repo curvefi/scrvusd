@@ -45,7 +45,10 @@ def test_get_rewards(vault, crvusd, vault_god, rewards_handler, accrual_strategy
     # 4. Random address calls process_rewards -> rewards are transferred to accrual strategy
     assert crvusd.balanceOf(accrual_strategy_ext) == strat_balance_init
     with boa.env.prank(boa.env.generate_address()):
-        rewards_handler.process_rewards(False)
+        if crvusd.balanceOf(accrual_strategy_ext) > 10**18:
+            rewards_handler.process_rewards(True)
+        else:
+            rewards_handler.process_rewards(False)
     # events = rewards_handler.get_logs()
     # print(events)
     assert crvusd.balanceOf(rewards_handler) == 0
@@ -61,7 +64,10 @@ def test_get_rewards(vault, crvusd, vault_god, rewards_handler, accrual_strategy
     for i in range(10):
         boa.env.time_travel(seconds=86_400)
         with boa.env.prank(boa.env.generate_address()):
-            rewards_handler.process_rewards()
+            if crvusd.balanceOf(accrual_strategy_ext) > 10**18:
+                rewards_handler.process_rewards(True)
+            else:
+                rewards_handler.process_rewards(False)
         print(
             f"5. Bal: {[crvusd.balanceOf(x)/1e18 for x in [alice, vault, rewards_handler, accrual_strategy_ext]]}"  # noqa E501
         )

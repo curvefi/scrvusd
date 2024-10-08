@@ -223,8 +223,6 @@ def process_rewards(update_debt: bool = True):
     gain: uint256 = 0
     loss: uint256 = 0
     gain, loss = extcall vault.process_report(strategy.address)
-    print(gain)
-    print(loss)
     # # 4. update strategy debt
     if update_debt:
         extcall vault.update_debt(strategy.address, 10 ** 18)
