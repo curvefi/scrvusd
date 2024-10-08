@@ -12,3 +12,27 @@ def setKeeper(_keeper: address):
 @external
 def management() -> address:
     ...
+
+@view
+@external
+def balanceOf(address: address) -> uint256:
+    ...
+
+@view
+@external
+def totalSupply() -> uint256:
+    ...
+
+@view
+@external
+def totalAssets() -> uint256:
+    ...
+
+@view
+@external
+def profitMaxUnlockTime() -> uint256:
+    ...
+
+@external
+def setProfitMaxUnlockTime(_profitMaxUnlockTime: uint256):
+    ...

@@ -49,7 +49,9 @@ def role_manager():
 def vault(vault_factory, crvusd, role_manager, accrual_strategy, dev_address):
     vault_deployer = boa.load_partial("contracts/yearn/Vault.vy")
 
-    address = vault_factory.deploy_new_vault(crvusd, "Staked crvUSD", "st-crvUSD", role_manager, 0)
+    address = vault_factory.deploy_new_vault(
+        crvusd, "Staked crvUSD", "st-crvUSD", role_manager, 86_400 * 7
+    )
 
     vault = vault_deployer.at(address)
 
@@ -169,3 +171,13 @@ def accrual_strategy(solc_args, crvusd, tokenized_strategy, dev_address):
     with boa.env.prank(dev_address):
         strategy = deployer.deploy(crvusd.address, "AccrualStrategy")
     return strategy
+
+
+@pytest.fixture(scope="module")
+def accrual_strategy_ext(accrual_strategy, dev_address):
+    accrual_strategy_extended_abi = boa.load_vyi("contracts/interfaces/IStrategy.vyi").at(
+        accrual_strategy.address
+    )
+    with boa.env.prank(dev_address):
+        accrual_strategy_extended_abi.setProfitMaxUnlockTime(0)
+    return accrual_strategy_extended_abi

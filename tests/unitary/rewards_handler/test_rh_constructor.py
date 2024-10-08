@@ -32,5 +32,5 @@ def test_default_behavior(
     assert rewards_handler.hasRole(rewards_handler.RATE_MANAGER(), curve_dao)
     # eoa would be the deployer from which we revoke the role
     assert not rewards_handler.hasRole(rewards_handler.DEFAULT_ADMIN_ROLE(), boa.env.eoa)
-    assert rewards_handler.eval("twa.twa_window") == 86400 * 7
+    assert rewards_handler.eval("twa.twa_window") == 86_400 * 7
     assert rewards_handler.eval("twa.min_snapshot_dt_seconds") == 1

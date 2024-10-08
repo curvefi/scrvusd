@@ -8,7 +8,7 @@ def test_deploy_vault(vault_factory, crvusd):
         "st-crvUSD",
         # TODO figure out who's going to be the role manager
         boa.env.generate_address(),
-        1234,
+        86_400 * 7,
     )
     vault = boa.load_partial("contracts/yearn/Vault.vy").at(vault)
     assert vault.name() == "Staked crvUSD"

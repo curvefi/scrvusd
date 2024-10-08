@@ -95,7 +95,7 @@ event ScalingFactorUpdated:
 
 
 RATE_MANAGER: public(constant(bytes32)) = keccak256("RATE_MANAGER")
-WEEK: constant(uint256) = 86400 * 7  # 7 days
+WEEK: constant(uint256) = 86_400 * 7  # 7 days
 MAX_BPS: constant(uint256) = 10**4  # 100%
 
 _SUPPORTED_INTERFACES: constant(bytes4[3]) = [
@@ -220,7 +220,11 @@ def process_rewards(update_debt: bool = True):
     # 2. report on strategy
     extcall strategy.report()
     # 3. start streaming the rewards to users
-    extcall vault.process_report(strategy.address)
+    gain: uint256 = 0
+    loss: uint256 = 0
+    gain, loss = extcall vault.process_report(strategy.address)
+    print(gain)
+    print(loss)
     # # 4. update strategy debt
     if update_debt:
         extcall vault.update_debt(strategy.address, 10 ** 18)

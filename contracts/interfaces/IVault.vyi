@@ -18,3 +18,8 @@ def default_queue(index: uint256) -> address:
 @external
 def update_debt(strategy: address, target_debt: uint256) -> uint256:
     ...
+
+@view
+@external
+def balanceOf(address: address) -> uint256:
+    ...
