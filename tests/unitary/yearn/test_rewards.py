@@ -64,17 +64,3 @@ def test_get_rewards(vault, crvusd, vault_god, rewards_handler, accrual_strategy
         vault.redeem(10_000 * 10**18, alice, alice, sender=alice)
     assert vault.balanceOf(alice) == 0
     assert crvusd.balanceOf(alice) >= 10_000 * 10**18 + 0.99 * AIRDROP_AMOUNT
-
-    # 5. time travel to drip rewards
-    # for i in range(10):  # 10 days
-    #     boa.env.time_travel(seconds=86_400)
-    #     with boa.env.prank(boa.env.generate_address()):
-    #         rewards_handler.process_rewards()
-    #     print(
-    #         f"5. Bal: {[crvusd.balanceOf(x)/1e18 for x in [alice, vault, rewards_handler, accrual_strategy_ext]]}"  # noqa E501
-    #     )
-    #     print(
-    #         f"5.Strat bal: {[accrual_strategy_ext.balanceOf(x)/1e18 for x in [vault, accrual_strategy_ext]]}, Total Supply: {accrual_strategy_ext.totalSupply()/1e18}"  # noqa E501
-    #     )
-    #     # print(vault.profitMaxUnlockTime())
-    #     # print(accrual_strategy_ext.profitMaxUnlockTime())
