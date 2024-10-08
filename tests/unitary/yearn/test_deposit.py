@@ -20,11 +20,13 @@ def test_deposit(vault, crvusd, role_manager, vault_god, rewards_handler, curve_
     rewards_handler.process_rewards()
     # we make 3 days pass
 
-    for i in range(7):
-        boa.env.time_travel(86400 * i)
+    steps = 14
+    for i in range(steps):
+        print("{:2%}".format(i / steps))
         with boa.env.anchor(), boa.env.prank(alice):
-            vault.approve(vault, 10**21, sender=alice)
-            vault.redeem(10**21, alice, alice, sender=alice)
+            boa.env.time_travel(86400 // 2 * i)
+            vault.approve(vault, 10**21)
+            vault.redeem(10**21, alice, alice)
             assert vault.balanceOf(alice) == 0
             assert crvusd.balanceOf(alice) >= 10**21
             print("alice balance has increased")
