@@ -1,4 +1,5 @@
 import boa
+import pytest
 
 
 def test_add_single_snapshot(setup_rewards_handler, snapshot_amount):
@@ -45,3 +46,21 @@ def test_add_snapshot_after_min_interval(setup_rewards_handler, snapshot_amount,
     # Verify that the snapshot was added
     final_len = rewards_handler.get_len_snapshots()
     assert final_len == 2, f"Expected 2 snapshots, got {final_len}"
+
+
+@pytest.mark.gas_profile
+def test_many_snapshots(setup_rewards_handler, snapshot_amount, snapshot_interval):
+    rewards_handler = setup_rewards_handler
+    N_SNAPSHOTS = 10_000
+    for i in range(N_SNAPSHOTS):
+        # Take a snapshot
+        rewards_handler.eval(f"twa._take_snapshot({snapshot_amount})")
+
+        # Time travel beyond min_snapshot_dt_seconds and take another snapshot
+        boa.env.time_travel(
+            seconds=snapshot_interval + 10
+        )  # Total of snapshot_interval + 10 seconds passed
+
+    # Verify that the snapshots were added
+    final_len = rewards_handler.get_len_snapshots()
+    assert final_len == N_SNAPSHOTS, f"Expected {N_SNAPSHOTS} snapshots, got {final_len}"
