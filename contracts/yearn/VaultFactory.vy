@@ -10,8 +10,8 @@
 
     The factory clones new vaults from its specific `VAULT_ORIGINAL`
     immutable address set on creation of the factory.
-
-    The deployments are done through create2 with a specific `salt`
+    
+    The deployments are done through create2 with a specific `salt` 
     that is derived from a combination of the deployer's address,
     the underlying asset used, as well as the name and symbol specified.
     Meaning a deployer will not be able to deploy the exact same vault
@@ -31,10 +31,10 @@
 
 interface IVault:
     def initialize(
-        asset: address,
-        name: String[64],
-        symbol: String[32],
-        role_manager: address,
+        asset: address, 
+        name: String[64], 
+        symbol: String[32], 
+        role_manager: address, 
         profit_max_unlock_time: uint256
     ): nonpayable
 
@@ -107,10 +107,10 @@ def __init__(name: String[64], vault_original: address, governance: address):
 
 @external
 def deploy_new_vault(
-    asset: address,
-    name: String[64],
-    symbol: String[32],
-    role_manager: address,
+    asset: address, 
+    name: String[64], 
+    symbol: String[32], 
+    role_manager: address, 
     profit_max_unlock_time: uint256
 ) -> address:
     """
@@ -127,19 +127,19 @@ def deploy_new_vault(
 
     # Clone a new version of the vault using create2.
     vault_address: address = create_minimal_proxy_to(
-            VAULT_ORIGINAL,
+            VAULT_ORIGINAL, 
             value=0,
             salt=keccak256(_abi_encode(msg.sender, asset, name, symbol))
         )
 
     IVault(vault_address).initialize(
-        asset,
-        name,
-        symbol,
-        role_manager,
-        profit_max_unlock_time,
+        asset, 
+        name, 
+        symbol, 
+        role_manager, 
+        profit_max_unlock_time, 
     )
-
+        
     log NewVault(vault_address, asset)
     return vault_address
 
@@ -165,7 +165,7 @@ def apiVersion() -> String[28]:
 @external
 def protocol_fee_config(vault: address = msg.sender) -> (uint16, address):
     """
-    @notice Called during vault and strategy reports
+    @notice Called during vault and strategy reports 
     to retrieve the protocol fee to charge and address
     to receive the fees.
     @param vault Address of the vault that would be reporting.
@@ -184,7 +184,7 @@ def protocol_fee_config(vault: address = msg.sender) -> (uint16, address):
         # Otherwise return the default config.
         config_data = self.default_protocol_fee_data
         return (
-            self._unpack_protocol_fee(config_data),
+            self._unpack_protocol_fee(config_data), 
             self._unpack_fee_recipient(config_data)
         )
 
@@ -205,7 +205,7 @@ def _unpack_protocol_fee(config_data: uint256) -> uint16:
     Unpacks the protocol fee from the packed data uint.
     """
     return convert(shift(config_data, -8) & FEE_BPS_MASK, uint16)
-
+    
 @view
 @internal
 def _unpack_fee_recipient(config_data: uint256) -> address:
@@ -246,18 +246,18 @@ def set_protocol_fee_bps(new_protocol_fee_bps: uint16):
     # Cache the current default protocol fee.
     default_fee_data: uint256 = self.default_protocol_fee_data
     recipient: address = self._unpack_fee_recipient(default_fee_data)
-
+    
     assert recipient != empty(address), "no recipient"
 
     # Set the new fee
     self.default_protocol_fee_data = self._pack_protocol_fee_data(
-        recipient,
-        new_protocol_fee_bps,
+        recipient, 
+        new_protocol_fee_bps, 
         False
     )
 
     log UpdateProtocolFeeBps(
-        self._unpack_protocol_fee(default_fee_data),
+        self._unpack_protocol_fee(default_fee_data), 
         new_protocol_fee_bps
     )
 
@@ -275,16 +275,16 @@ def set_protocol_fee_recipient(new_protocol_fee_recipient: address):
     default_fee_data: uint256 = self.default_protocol_fee_data
 
     self.default_protocol_fee_data = self._pack_protocol_fee_data(
-        new_protocol_fee_recipient,
-        self._unpack_protocol_fee(default_fee_data),
+        new_protocol_fee_recipient, 
+        self._unpack_protocol_fee(default_fee_data), 
         False
     )
-
+    
     log UpdateProtocolFeeRecipient(
         self._unpack_fee_recipient(default_fee_data),
         new_protocol_fee_recipient
     )
-
+    
 
 @external
 def set_custom_protocol_fee_bps(vault: address, new_custom_protocol_fee: uint16):
@@ -301,14 +301,14 @@ def set_custom_protocol_fee_bps(vault: address, new_custom_protocol_fee: uint16)
     assert self._unpack_fee_recipient(self.default_protocol_fee_data) != empty(address), "no recipient"
 
     self.custom_protocol_fee_data[vault] = self._pack_protocol_fee_data(
-        empty(address),
-        new_custom_protocol_fee,
+        empty(address), 
+        new_custom_protocol_fee, 
         True
     )
 
     log UpdateCustomProtocolFee(vault, new_custom_protocol_fee)
 
-@external
+@external 
 def remove_custom_protocol_fee(vault: address):
     """
     @notice Allows governance to remove a previously set
@@ -336,7 +336,7 @@ def shutdown_factory():
     assert self.shutdown == False, "shutdown"
 
     self.shutdown = True
-
+    
     log FactoryShutdown()
 
 @external
