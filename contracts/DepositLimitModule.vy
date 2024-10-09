@@ -2,8 +2,8 @@
 
 """
 @title Temporary Deposit Limit Module for yearn vaults
-@notice This contract temporarily controls deposits into a yearn vault and manages roles (admin and controller).
-@dev Admins can appoint new admins and controllers, while controllers can pause or resume deposits.
+@notice This contract temporarily controls deposits into a yearn vault and manages roles (admin and security_agent).
+@dev Admins can appoint new admins and security_agents, while security_agents can pause or resume deposits.
 This module will be removed once the vault is battle-tested and proven stable.
 """
 
@@ -18,9 +18,9 @@ from interfaces import IVault
 #                           STORAGE                            #
 ################################################################
 
-# Two main roles: admin and controller
+# Two main roles: admin and security_agent
 is_admin: public(HashMap[address, bool])
-is_controller: public(HashMap[address, bool])
+is_security_agent: public(HashMap[address, bool])
 
 # Main contract state for deposit control
 deposits_paused: public(bool)
@@ -41,10 +41,10 @@ def __init__(
     max_deposit_limit: uint256,
 ):
     """
-    @notice Initializes the contract by assigning the deployer as the initial admin and controller.
+    @notice Initializes the contract by assigning the deployer as the initial admin and security_agent.
     """
     self._set_admin(msg.sender, True)
-    self._set_controller(msg.sender, True)
+    self._set_security_agent(msg.sender, True)
     self._set_deposits_paused(False)  # explicit non-paused at init
     self._set_deposit_limit(max_deposit_limit)
 
@@ -66,13 +66,13 @@ def _set_admin(_address: address, is_admin: bool):
 
 
 @internal
-def _set_controller(_address: address, is_controller: bool):
+def _set_security_agent(_address: address, is_security_agent: bool):
     """
-    @notice Internal function to assign or revoke controller role.
-    @param address The address to be granted or revoked controller status.
-    @param is_controller Boolean indicating if the address should be a controller.
+    @notice Internal function to assign or revoke security_agent role.
+    @param address The address to be granted or revoked security_agent status.
+    @param is_security_agent Boolean indicating if the address should be a security_agent.
     """
-    self.is_controller[_address] = is_controller
+    self.is_security_agent[_address] = is_security_agent
 
 
 @internal
@@ -110,25 +110,25 @@ def set_admin(new_admin: address, is_admin: bool):
 
 
 @external
-def set_controller(new_controller: address, is_controller: bool):
+def set_security_agent(new_security_agent: address, is_security_agent: bool):
     """
-    @notice Allows an admin to grant or revoke controller role to another address.
-    @param new_controller The address to grant or revoke controller role.
-    @param is_controller Boolean indicating if the address should be a controller.
+    @notice Allows an admin to grant or revoke security_agent role to another address.
+    @param new_security_agent The address to grant or revoke security_agent role.
+    @param is_security_agent Boolean indicating if the address should be a security_agent.
     @dev Only callable by an admin.
     """
     assert self.is_admin[msg.sender], "Caller is not an admin"
-    self._set_controller(new_controller, is_controller)
+    self._set_security_agent(new_security_agent, is_security_agent)
 
 
 @external
 def set_deposits_paused(state: bool):
     """
-    @notice Allows a controller to pause or resume deposits.
+    @notice Allows a security_agent to pause or resume deposits.
     @param state Boolean indicating the desired paused state for deposits.
-    @dev Only callable by a controller.
+    @dev Only callable by a security_agent.
     """
-    assert self.is_controller[msg.sender], "Caller is not a controller"
+    assert self.is_security_agent[msg.sender], "Caller is not a security_agent"
     self._set_deposits_paused(state)
 
 

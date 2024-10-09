@@ -5,9 +5,9 @@ def test_available_deposit_limit_paused(deposit_limit_module, security_agent, de
     """
     Tests that the available deposit limit returns 0 when deposits are paused.
     """
-    # Set controller status for external_controller using dev_address privileges
+    # Set security_agent status for security_agent using dev_address privileges
     with boa.env.prank(dev_address):
-        deposit_limit_module.set_controller(security_agent, True)
+        deposit_limit_module.set_security_agent(security_agent, True)
 
     # Pause deposits
     with boa.env.prank(security_agent):
