@@ -49,6 +49,7 @@ def __init__(
     self._set_admin(msg.sender, True)
     self._set_controller(msg.sender, True)
     self._set_deposits_paused(False)  # explicit non-paused at init
+    self._set_deposit_limit(max_deposit_limit)
 
     stablecoin = _stablecoin
     vault = _vault
@@ -161,4 +162,8 @@ def available_deposit_limit(receiver: address) -> uint256:
     if self.deposits_paused:
         return 0
     else:
-        return self.max_deposit_limit
+        vault_balance: uint256 = staticcall stablecoin.balanceOf(vault)
+        if vault_balance >= self.max_deposit_limit:
+            return 0
+        else:
+            return self.max_deposit_limit - vault_balance
