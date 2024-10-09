@@ -11,20 +11,12 @@ repos:
       - id: check-ast
       - id: detect-private-key
 
-  - repo: https://github.com/psf/black-pre-commit-mirror
-    rev: 24.8.0
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.6.9
     hooks:
-      - id: black
-        args: [--line-length=100]
-  - repo: https://github.com/pycqa/flake8
-    rev: 7.1.1
-    hooks:
-      - id: flake8
-  - repo: https://github.com/pycqa/isort
-    rev: 5.13.2
-    hooks:
-      - id: isort
-        args: ["--profile", "black", "--line-length=100"]
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+      - id: ruff-format
 
 default_language_version:
   python: python3.12

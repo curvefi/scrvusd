@@ -4,19 +4,11 @@ on: [push]
 
 jobs:
   # Linting with Pre-commit
-  lint:
+  ruff:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
-
-      - name: Set up Python 3.12.6
-        uses: actions/setup-python@v5
-        with:
-          python-version: 3.12.6
-
-      # Run pre-commit hooks (e.g., black, flake8, isort)
-      - uses: pre-commit/action@v3.0.0
+      - uses: astral-sh/ruff-action@v1
 
   # Test runs
   tests:

@@ -2,7 +2,6 @@ import boa
 
 
 def test_default_behavior(deposit_limit_module, dev_address, security_agent):
-
     # Verify that security_agent is not yet a security_agent
     assert not deposit_limit_module.is_security_agent(security_agent)
 
