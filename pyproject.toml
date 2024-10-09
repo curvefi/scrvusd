@@ -1,35 +1,40 @@
-[tool.poetry]
-name = "stcrvusd"
-version = "0.1.0"
-description = ""
-authors = ["Curve.fi"]
-readme = "README.md"
-package-mode = false
+[project]
+name            = "scrvusd"
+version         = "0.1.0"
+description     = ""
+authors         = [{ name = "Curve.fi", email = "info@curve.fi" }]
+readme          = "README.md"
+requires-python = ">=3.10"
+
+# Requirements
+dependencies = [
+    "vyper>=0.4.0",
+    "snekmate==0.1.0",
+    "titanoboa",       # Keep this as a placeholder in the dependencies array
+]
+
+[tool.uv.sources]
+titanoboa = { git = "https://github.com/vyperlang/titanoboa.git", rev = "86df8936654db20686410488738d7abaf165a4c9" }
+
+[project.optional-dependencies]
+dev = [
+    "mamushi==0.0.4a3",
+    "pre-commit==3.8.0",
+    "black==24.8.0",
+    "pytest==8.2.2",
+    "pytest-xdist==3.6.1",
+]
+scripts = [
+    "tqdm==4.66.5",
+    "curve-dao==1.0.0",
+    "jupyter==1.0.0",
+    "python-dotenv==1.0.1",
+]
+
 
 [tool.black]
-line-length = 100
-target_version = ['py312']
-
-[tool.poetry.dependencies]
-python = "^3.10"
-poetry = "^1.8.3"
-vyper = "0.4.0"
-titanoboa = { git = "https://github.com/vyperlang/titanoboa.git", rev = "4768207288ec8fb23a4817ae193bd707ab9d1e8f" }
-snekmate = "0.1.0"
-
-[tool.poetry.group.dev.dependencies]
-mamushi = "0.0.4a3"
-pre-commit = "^3.8.0"
-black = "24.8.0"
-pytest = "^8.2.2"
-pytest-xdist = "^3.6.1"
-
-[tool.poetry.group.scripts.dependencies]
-tqdm = "^4.66.5"
-curve-dao = "^1.0.0"
-jupyter = "^1.0.0"
-python-dotenv = "^1.0.1"
+line-length    = 100
+target_version = ["py312"]
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["setuptools", "wheel"]
