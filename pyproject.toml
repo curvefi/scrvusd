@@ -6,7 +6,6 @@ authors = ["Curve.fi"]
 readme = "README.md"
 package-mode = false
 
-
 [tool.black]
 line-length = 100
 target_version = ['py312']
@@ -15,9 +14,8 @@ target_version = ['py312']
 python = "^3.10"
 poetry = "^1.8.3"
 vyper = "0.4.0"
-snekmate = "0.1.0"
 titanoboa = { git = "https://github.com/vyperlang/titanoboa.git", rev = "4768207288ec8fb23a4817ae193bd707ab9d1e8f" }
-boa-solidity = { git = "https://github.com/AlbertoCentonze/boa-solidity", rev = "500d2e9a6950eb3193c5a6a1d4637cd3e3befa77" }
+snekmate = "0.1.0"
 
 [tool.poetry.group.dev.dependencies]
 mamushi = "0.0.4a3"

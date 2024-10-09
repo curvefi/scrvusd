@@ -29,42 +29,52 @@
     fee recipient.
 """
 
+
 interface IVault:
     def initialize(
         asset: address,
         name: String[64],
         symbol: String[32],
         role_manager: address,
-        profit_max_unlock_time: uint256
+        profit_max_unlock_time: uint256,
     ): nonpayable
+
 
 event NewVault:
     vault_address: indexed(address)
     asset: indexed(address)
 
+
 event UpdateProtocolFeeBps:
     old_fee_bps: uint16
     new_fee_bps: uint16
+
 
 event UpdateProtocolFeeRecipient:
     old_fee_recipient: indexed(address)
     new_fee_recipient: indexed(address)
 
+
 event UpdateCustomProtocolFee:
     vault: indexed(address)
     new_custom_protocol_fee: uint16
 
+
 event RemovedCustomProtocolFee:
     vault: indexed(address)
+
 
 event FactoryShutdown:
     pass
 
+
 event UpdateGovernance:
     governance: indexed(address)
 
+
 event NewPendingGovernance:
     pending_governance: indexed(address)
+
 
 struct PFConfig:
     # Percent of protocol's split of fees in Basis Points.
@@ -72,11 +82,12 @@ struct PFConfig:
     # Address the protocol fees get paid to.
     fee_recipient: address
 
+
 # Identifier for this version of the vault.
 API_VERSION: constant(String[28]) = "3.0.2"
 
 # The max amount the protocol fee can be set to.
-MAX_FEE_BPS: constant(uint16) = 5_000 # 50%
+MAX_FEE_BPS: constant(uint16) = 5_000  # 50%
 
 # The address that all newly deployed vaults are based from.
 VAULT_ORIGINAL: immutable(address)
@@ -99,11 +110,13 @@ custom_protocol_fee: public(HashMap[address, uint16])
 # Represents if a custom protocol fee should be used.
 use_custom_protocol_fee: public(HashMap[address, bool])
 
+
 @external
 def __init__(name: String[64], vault_original: address, governance: address):
     self.name = name
     VAULT_ORIGINAL = vault_original
     self.governance = governance
+
 
 @external
 def deploy_new_vault(
@@ -111,7 +124,7 @@ def deploy_new_vault(
     name: String[64],
     symbol: String[32],
     role_manager: address,
-    profit_max_unlock_time: uint256
+    profit_max_unlock_time: uint256,
 ) -> address:
     """
     @notice Deploys a new clone of the original vault.
@@ -127,10 +140,10 @@ def deploy_new_vault(
 
     # Clone a new version of the vault using create2.
     vault_address: address = create_minimal_proxy_to(
-            VAULT_ORIGINAL,
-            value=0,
-            salt=keccak256(_abi_encode(msg.sender, asset, name, symbol))
-        )
+        VAULT_ORIGINAL,
+        value=0,
+        salt=keccak256(_abi_encode(msg.sender, asset, name, symbol)),
+    )
 
     IVault(vault_address).initialize(
         asset,
@@ -143,14 +156,16 @@ def deploy_new_vault(
     log NewVault(vault_address, asset)
     return vault_address
 
+
 @view
 @external
-def vault_original()-> address:
+def vault_original() -> address:
     """
     @notice Get the address of the vault to clone from
     @return The address of the original vault.
     """
     return VAULT_ORIGINAL
+
 
 @view
 @external
@@ -160,6 +175,7 @@ def apiVersion() -> String[28]:
     @return The API version of the factory.
     """
     return API_VERSION
+
 
 @view
 @external
@@ -174,13 +190,16 @@ def protocol_fee_config(vault: address = msg.sender) -> PFConfig:
     # If there is a custom protocol fee set we return it.
     if self.use_custom_protocol_fee[vault]:
         # Always use the default fee recipient even with custom fees.
-        return PFConfig({
-            fee_bps: self.custom_protocol_fee[vault],
-            fee_recipient: self.default_protocol_fee_config.fee_recipient
-        })
+        return PFConfig(
+            {
+                fee_bps: self.custom_protocol_fee[vault],
+                fee_recipient: self.default_protocol_fee_config.fee_recipient,
+            }
+        )
     else:
         # Otherwise return the default config.
         return self.default_protocol_fee_config
+
 
 @external
 def set_protocol_fee_bps(new_protocol_fee_bps: uint16):
@@ -200,10 +219,7 @@ def set_protocol_fee_bps(new_protocol_fee_bps: uint16):
     # Set the new fee
     self.default_protocol_fee_config.fee_bps = new_protocol_fee_bps
 
-    log UpdateProtocolFeeBps(
-        default_config.fee_bps,
-        new_protocol_fee_bps
-    )
+    log UpdateProtocolFeeBps(default_config.fee_bps, new_protocol_fee_bps)
 
 
 @external
@@ -220,14 +236,13 @@ def set_protocol_fee_recipient(new_protocol_fee_recipient: address):
 
     self.default_protocol_fee_config.fee_recipient = new_protocol_fee_recipient
 
-    log UpdateProtocolFeeRecipient(
-        old_recipient,
-        new_protocol_fee_recipient
-    )
+    log UpdateProtocolFeeRecipient(old_recipient, new_protocol_fee_recipient)
 
 
 @external
-def set_custom_protocol_fee_bps(vault: address, new_custom_protocol_fee: uint16):
+def set_custom_protocol_fee_bps(
+    vault: address, new_custom_protocol_fee: uint16
+):
     """
     @notice Allows Governance to set custom protocol fees
     for a specific vault or strategy.
@@ -238,7 +253,9 @@ def set_custom_protocol_fee_bps(vault: address, new_custom_protocol_fee: uint16)
     """
     assert msg.sender == self.governance, "not governance"
     assert new_custom_protocol_fee <= MAX_FEE_BPS, "fee too high"
-    assert self.default_protocol_fee_config.fee_recipient != empty(address), "no recipient"
+    assert self.default_protocol_fee_config.fee_recipient != empty(
+        address
+    ), "no recipient"
 
     self.custom_protocol_fee[vault] = new_custom_protocol_fee
 
@@ -248,6 +265,7 @@ def set_custom_protocol_fee_bps(vault: address, new_custom_protocol_fee: uint16)
         self.use_custom_protocol_fee[vault] = True
 
     log UpdateCustomProtocolFee(vault, new_custom_protocol_fee)
+
 
 @external
 def remove_custom_protocol_fee(vault: address):
@@ -267,6 +285,7 @@ def remove_custom_protocol_fee(vault: address):
 
     log RemovedCustomProtocolFee(vault)
 
+
 @external
 def shutdown_factory():
     """
@@ -283,6 +302,7 @@ def shutdown_factory():
 
     log FactoryShutdown()
 
+
 @external
 def set_governance(new_governance: address):
     """
@@ -293,6 +313,7 @@ def set_governance(new_governance: address):
     self.pending_governance = new_governance
 
     log NewPendingGovernance(new_governance)
+
 
 @external
 def accept_governance():
