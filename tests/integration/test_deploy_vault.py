@@ -10,5 +10,5 @@ def test_deploy_vault(vault_factory, crvusd):
         boa.env.generate_address(),
         1234,
     )
-    vault = boa.load_partial("contracts/yearn/Vault.vy").at(vault)
+    vault = boa.load_partial("contracts/yearn/VaultV3.vy").at(vault)
     assert vault.name() == "Staked crvUSD"

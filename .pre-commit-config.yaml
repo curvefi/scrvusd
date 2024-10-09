@@ -1,3 +1,5 @@
+exclude: 'contracts/yearn/VaultV3\.vy|VaultFactory\.vy'
+
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.1.0
@@ -25,4 +27,4 @@ repos:
         args: ["--profile", "black", --line-length=100]
 
 default_language_version:
-  python: python3.12.6
+  python: python3.12

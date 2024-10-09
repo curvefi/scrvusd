@@ -21,7 +21,7 @@ def deployer():
 
 @pytest.fixture(scope="module")
 def vault_original():
-    return boa.load("contracts/yearn/Vault.vy")
+    return boa.load("contracts/yearn/VaultV3.vy")
 
 
 @pytest.fixture(scope="module")
@@ -46,7 +46,7 @@ def role_manager():
 
 @pytest.fixture(scope="module")
 def vault(vault_factory, crvusd, role_manager):
-    vault_deployer = boa.load_partial("contracts/yearn/Vault.vy")
+    vault_deployer = boa.load_partial("contracts/yearn/VaultV3.vy")
 
     address = vault_factory.deploy_new_vault(crvusd, "Staked crvUSD", "st-crvUSD", role_manager, 0)
 
