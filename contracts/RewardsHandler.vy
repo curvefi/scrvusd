@@ -83,6 +83,7 @@ exports: (
 event MinimumWeightUpdated:
     new_minimum_weight: uint256
 
+
 event ScalingFactorUpdated:
     new_scaling_factor: uint256
 
@@ -93,6 +94,7 @@ event ScalingFactorUpdated:
 
 
 RATE_MANAGER: public(constant(bytes32)) = keccak256("RATE_MANAGER")
+RECOVERY_MANAGER: public(constant(bytes32)) = keccak256("RECOVERY_MANAGER")
 WEEK: constant(uint256) = 86400 * 7  # 7 days
 MAX_BPS: constant(uint256) = 10**4  # 100%
 
@@ -142,8 +144,9 @@ def __init__(
     access_control.__init__()
     # admin (most likely the dao) controls who can be a rate manager
     access_control._grant_role(access_control.DEFAULT_ADMIN_ROLE, admin)
-    # admin itself is a RATE_ADMIN
+    # admin itself is a RATE_MANAGER and RECOVERY_MANAGER
     access_control._grant_role(RATE_MANAGER, admin)
+    access_control._grant_role(RECOVERY_MANAGER, admin)
     # deployer does not control this contract
     access_control._revoke_role(access_control.DEFAULT_ADMIN_ROLE, msg.sender)
 
@@ -204,11 +207,12 @@ def process_rewards():
         self.distribution_time != 0
     ), "rewards should be distributed over time"
 
-
     # any crvUSD sent to this contract (usually through the fee splitter, but
     # could also come from other sources) will be used as a reward for crvUSD
     # stakers in the vault.
     available_balance: uint256 = staticcall stablecoin.balanceOf(self)
+
+    assert available_balance > 0, "no rewards to distribute"
 
     # we distribute funds in 2 steps:
     # 1. transfer the actual funds
@@ -247,7 +251,9 @@ def weight() -> uint256:
     for more at the beginning and can also be increased in the future if someone
     tries to manipulate the time-weighted average of the tvl ratio.
     """
-    return max(twa._compute() * self.scaling_factor // MAX_BPS, self.minimum_weight)
+    return max(
+        twa._compute() * self.scaling_factor // MAX_BPS, self.minimum_weight
+    )
 
 
 ################################################################
@@ -346,7 +352,7 @@ def recover_erc20(token: IERC20, receiver: address):
     to this contract. crvUSD cannot be recovered as it's part of the core logic of
     this contract.
     """
-    access_control._check_role(RATE_MANAGER, msg.sender)
+    access_control._check_role(RECOVERY_MANAGER, msg.sender)
 
     # if crvUSD was sent by accident to the contract the funds are lost and will
     # be distributed as staking rewards on the next `process_rewards` call.
