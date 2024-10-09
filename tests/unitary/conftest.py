@@ -21,6 +21,19 @@ def dev_address():
 
 
 @pytest.fixture(scope="module")
+def deposit_limit_controller():
+    return boa.env.generate_address()
+
+
+@pytest.fixture(scope="module")
+def deposit_limit_module(dev_address):
+    contract_deployer = boa.load_partial("contracts/DepositLimitModule.vy")
+    with boa.env.prank(dev_address):
+        contract = contract_deployer()
+    return contract
+
+
+@pytest.fixture(scope="module")
 def vault_original():
     return boa.load("contracts/yearn/VaultV3.vy")
 
