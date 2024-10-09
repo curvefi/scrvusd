@@ -11,6 +11,7 @@ def yearn_gov():
 
 @pytest.fixture(scope="module")
 def curve_dao():
+    # TODO add a fixture for rate managers that contains curve dao
     return boa.env.generate_address()
 
 
