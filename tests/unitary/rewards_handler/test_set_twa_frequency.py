@@ -10,9 +10,9 @@ def test_default_behavior(rewards_handler, curve_dao):
     assert updated_twa_dt == new_twa_dt
 
 
-def test_role_access(rewards_handler, curve_dao, deployer):
+def test_role_access(rewards_handler, curve_dao, dev_address):
     # validate that deployer can't change twa parameters
     with boa.reverts("access_control: account is missing role"):
-        rewards_handler.set_twa_window(1, sender=deployer)
+        rewards_handler.set_twa_window(1, sender=dev_address)
     with boa.reverts("access_control: account is missing role"):
-        rewards_handler.set_twa_snapshot_dt(1, sender=deployer)
+        rewards_handler.set_twa_snapshot_dt(1, sender=dev_address)

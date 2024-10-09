@@ -95,7 +95,7 @@ event ScalingFactorUpdated:
 
 RATE_MANAGER: public(constant(bytes32)) = keccak256("RATE_MANAGER")
 RECOVERY_MANAGER: public(constant(bytes32)) = keccak256("RECOVERY_MANAGER")
-WEEK: constant(uint256) = 86400 * 7  # 7 days
+WEEK: constant(uint256) = 86_400 * 7  # 7 days
 MAX_BPS: constant(uint256) = 10**4  # 100%
 
 _SUPPORTED_INTERFACES: constant(bytes4[3]) = [
