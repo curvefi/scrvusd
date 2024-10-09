@@ -12,7 +12,7 @@ This module will be removed once the vault is battle-tested and proven stable.
 #                           INTERFACES                         #
 ################################################################
 
-from ethereum.ercs import IERC20
+from interfaces import IVault
 
 ################################################################
 #                           STORAGE                            #
@@ -29,9 +29,7 @@ deposits_paused: public(bool)
 max_deposit_limit: public(uint256)
 
 # Stablecoin/Vault addresses
-stablecoin: immutable(IERC20)
-vault: public(immutable(address))
-
+vault: public(immutable(IVault))
 
 ################################################################
 #                         CONSTRUCTOR                          #
@@ -39,8 +37,7 @@ vault: public(immutable(address))
 
 @deploy
 def __init__(
-    _stablecoin: IERC20,
-    _vault: address,
+    _vault: IVault,
     max_deposit_limit: uint256,
 ):
     """
@@ -51,7 +48,6 @@ def __init__(
     self._set_deposits_paused(False)  # explicit non-paused at init
     self._set_deposit_limit(max_deposit_limit)
 
-    stablecoin = _stablecoin
     vault = _vault
 
 
@@ -161,8 +157,10 @@ def available_deposit_limit(receiver: address) -> uint256:
     """
     if self.deposits_paused:
         return 0
+    if self.max_deposit_limit == max_value(uint256):
+        return max_value(uint256)
     else:
-        vault_balance: uint256 = staticcall stablecoin.balanceOf(vault)
+        vault_balance: uint256 = staticcall vault.totalAssets()
         if vault_balance >= self.max_deposit_limit:
             return 0
         else:

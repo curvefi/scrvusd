@@ -2,7 +2,6 @@ import boa
 import pytest
 
 MOCK_CRV_USD_CIRCULATING_SUPPLY = 69_420_000 * 10**18
-VAULT_INITIAL_CAP = 5_000_000 * 10**18
 
 
 @pytest.fixture(scope="module")
@@ -22,15 +21,20 @@ def dev_address():
 
 
 @pytest.fixture(scope="module")
-def deposit_limit_controller():
+def security_agent():
     return boa.env.generate_address()
 
 
 @pytest.fixture(scope="module")
-def deposit_limit_module(dev_address, crvusd, vault):
+def vault_init_deposit_cap():
+    return 5_000_000 * 10**18
+
+
+@pytest.fixture(scope="module")
+def deposit_limit_module(dev_address, crvusd, vault, vault_init_deposit_cap):
     contract_deployer = boa.load_partial("contracts/DepositLimitModule.vy")
     with boa.env.prank(dev_address):
-        contract = contract_deployer(crvusd, vault, VAULT_INITIAL_CAP)
+        contract = contract_deployer(vault, vault_init_deposit_cap)
     return contract
 
 
@@ -60,10 +64,13 @@ def role_manager():
 
 
 @pytest.fixture(scope="module")
-def vault(vault_factory, crvusd, role_manager):
+def vault(vault_factory, crvusd, role_manager, dev_address):
     vault_deployer = boa.load_partial("contracts/yearn/VaultV3.vy")
 
-    address = vault_factory.deploy_new_vault(crvusd, "Staked crvUSD", "st-crvUSD", role_manager, 0)
+    with boa.env.prank(dev_address):
+        address = vault_factory.deploy_new_vault(
+            crvusd, "Staked crvUSD", "st-crvUSD", role_manager, 0
+        )
 
     return vault_deployer.at(address)
 

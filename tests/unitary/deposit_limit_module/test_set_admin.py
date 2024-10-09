@@ -17,12 +17,12 @@ def test_default_behavior(deposit_limit_module, dev_address, curve_dao):
     assert not deposit_limit_module.is_admin(dev_address)
 
 
-def test_set_admin_unauthorized(deposit_limit_module, curve_dao, deposit_limit_controller):
+def test_set_admin_unauthorized(deposit_limit_module, curve_dao, security_agent):
     # Verify that curve_dao is not an admin
     assert not deposit_limit_module.is_admin(curve_dao)
 
     # Attempt to set admin status using an unauthorized (non-admin) address
-    with boa.env.prank(deposit_limit_controller), boa.reverts("Caller is not an admin"):
+    with boa.env.prank(security_agent), boa.reverts("Caller is not an admin"):
         deposit_limit_module.set_admin(curve_dao, True)
 
     # Verify that curve_dao is not an admin since the call should have failed
