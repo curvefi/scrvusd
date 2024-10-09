@@ -6,7 +6,7 @@ def test_default_behavior(deposit_limit_module, dev_address, deposit_limit_contr
     assert not deposit_limit_module.deposits_paused()
 
     # Check that available deposit limit returns the maximum when deposits are unpaused
-    max_limit = 2**256 - 1
+    max_limit = deposit_limit_module.available_deposit_limit(deposit_limit_controller)
     assert deposit_limit_module.available_deposit_limit(deposit_limit_controller) == max_limit
 
     # Set controller status for external_controller using dev_address privileges

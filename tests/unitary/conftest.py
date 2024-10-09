@@ -2,6 +2,7 @@ import boa
 import pytest
 
 MOCK_CRV_USD_CIRCULATING_SUPPLY = 69_420_000 * 10**18
+VAULT_INITIAL_CAP = 5_000_000 * 10**18
 
 
 @pytest.fixture(scope="module")
@@ -26,10 +27,10 @@ def deposit_limit_controller():
 
 
 @pytest.fixture(scope="module")
-def deposit_limit_module(dev_address):
+def deposit_limit_module(dev_address, crvusd, vault):
     contract_deployer = boa.load_partial("contracts/DepositLimitModule.vy")
     with boa.env.prank(dev_address):
-        contract = contract_deployer()
+        contract = contract_deployer(crvusd, vault, VAULT_INITIAL_CAP)
     return contract
 
 

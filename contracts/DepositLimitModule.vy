@@ -1,11 +1,18 @@
 # pragma version ~=0.4
 
 """
-@title Deposit Limit Module for yearn vaults
-@notice This contract controls deposits into yearn vault, and additionally manages roles (admin and controller).
+@title Temporary Deposit Limit Module for yearn vaults
+@notice This contract temporarily controls deposits into a yearn vault and manages roles (admin and controller).
 @dev Admins can appoint new admins and controllers, while controllers can pause or resume deposits.
+This module will be removed once the vault is battle-tested and proven stable.
 """
 
+
+################################################################
+#                           INTERFACES                         #
+################################################################
+
+from ethereum.ercs import IERC20
 
 ################################################################
 #                           STORAGE                            #
@@ -18,19 +25,33 @@ is_controller: public(HashMap[address, bool])
 # Main contract state for deposit control
 deposits_paused: public(bool)
 
+# Max deposit limit
+max_deposit_limit: public(uint256)
+
+# Stablecoin/Vault addresses
+stablecoin: immutable(IERC20)
+vault: public(immutable(address))
+
 
 ################################################################
 #                         CONSTRUCTOR                          #
 ################################################################
 
 @deploy
-def __init__():
+def __init__(
+    _stablecoin: IERC20,
+    _vault: address,
+    max_deposit_limit: uint256,
+):
     """
     @notice Initializes the contract by assigning the deployer as the initial admin and controller.
     """
     self._set_admin(msg.sender, True)
     self._set_controller(msg.sender, True)
-    self._set_deposits_paused(False)
+    self._set_deposits_paused(False)  # explicit non-paused at init
+
+    stablecoin = _stablecoin
+    vault = _vault
 
 
 ################################################################
@@ -64,6 +85,15 @@ def _set_deposits_paused(is_paused: bool):
     @param is_paused Boolean indicating if deposits should be paused.
     """
     self.deposits_paused = is_paused
+
+
+@internal
+def _set_deposit_limit(new_limit: uint256):
+    """
+    @notice Internal function to set the maximum deposit limit.
+    @param new_limit The new maximum deposit limit.
+    """
+    self.max_deposit_limit = new_limit
 
 
 ################################################################
@@ -105,6 +135,17 @@ def set_deposits_paused(state: bool):
     self._set_deposits_paused(state)
 
 
+@external
+def set_deposit_limit(new_limit: uint256):
+    """
+    @notice Allows an admin to update the maximum deposit limit.
+    @param new_limit The new maximum deposit limit.
+    @dev Only callable by an admin.
+    """
+    assert self.is_admin[msg.sender], "Caller is not an admin"
+    self._set_deposit_limit(new_limit)
+
+
 ################################################################
 #                        VIEW FUNCTIONS                        #
 ################################################################
@@ -120,4 +161,4 @@ def available_deposit_limit(receiver: address) -> uint256:
     if self.deposits_paused:
         return 0
     else:
-        return max_value(uint256)
+        return self.max_deposit_limit
