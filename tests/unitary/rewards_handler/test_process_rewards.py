@@ -5,7 +5,7 @@ def test_default_behavior(rewards_handler, crvusd, vault, curve_dao):
     distributed_amount = 10**18 * 100
     boa.deal(crvusd, rewards_handler, distributed_amount)
 
-    rewards_handler.set_distribution_time(86400 * 7, sender=curve_dao)
+    rewards_handler.set_distribution_time(86_400 * 7, sender=curve_dao)
 
     assert crvusd.balanceOf(rewards_handler) == distributed_amount
 

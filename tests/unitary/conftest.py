@@ -16,7 +16,7 @@ def curve_dao():
 
 
 @pytest.fixture(scope="module")
-def deployer():
+def dev_address():
     return boa.env.generate_address()
 
 
@@ -105,17 +105,20 @@ def mock_peg_keeper():
 
 @pytest.fixture(scope="module")
 def rewards_handler(
-    vault, crvusd, role_manager, minimum_weight, scaling_factor, mock_controller_factory, curve_dao
+    vault,
+    crvusd,
+    role_manager,
+    minimum_weight,
+    scaling_factor,
+    mock_controller_factory,
+    curve_dao,
+    dev_address,
 ):
-    rh = boa.load(
-        "contracts/RewardsHandler.vy",
-        crvusd,
-        vault,
-        minimum_weight,
-        scaling_factor,
-        mock_controller_factory,
-        curve_dao,
-    )
+    rewards_handler_deployer = boa.load_partial("contracts/RewardsHandler.vy")
+    with boa.env.prank(dev_address):
+        rh = rewards_handler_deployer(
+            crvusd, vault, minimum_weight, scaling_factor, mock_controller_factory, curve_dao
+        )
 
     vault.set_role(rh, 2**11 | 2**5 | 2**0, sender=role_manager)
 
