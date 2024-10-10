@@ -1,0 +1,316 @@
+# Events
+
+event Transfer:
+    sender: address
+    receiver: address
+    value: uint256
+event Approval:
+    owner: address
+    spender: address
+    value: uint256
+event TokenExchange:
+    buyer: address
+    sold_id: int128
+    tokens_sold: uint256
+    bought_id: int128
+    tokens_bought: uint256
+event TokenExchangeUnderlying:
+    buyer: address
+    sold_id: int128
+    tokens_sold: uint256
+    bought_id: int128
+    tokens_bought: uint256
+event AddLiquidity:
+    provider: address
+    token_amounts: DynArray[uint256, 8]
+    fees: DynArray[uint256, 8]
+    invariant: uint256
+    token_supply: uint256
+event RemoveLiquidity:
+    provider: address
+    token_amounts: DynArray[uint256, 8]
+    fees: DynArray[uint256, 8]
+    token_supply: uint256
+event RemoveLiquidityOne:
+    provider: address
+    token_id: int128
+    token_amount: uint256
+    coin_amount: uint256
+    token_supply: uint256
+event RemoveLiquidityImbalance:
+    provider: address
+    token_amounts: DynArray[uint256, 8]
+    fees: DynArray[uint256, 8]
+    invariant: uint256
+    token_supply: uint256
+event RampA:
+    old_A: uint256
+    new_A: uint256
+    initial_time: uint256
+    future_time: uint256
+event StopRampA:
+    A: uint256
+    t: uint256
+event ApplyNewFee:
+    fee: uint256
+    offpeg_fee_multiplier: uint256
+event SetNewMATime:
+    ma_exp_time: uint256
+    D_ma_time: uint256
+
+# Functions
+
+@external
+def exchange(i: int128, j: int128, _dx: uint256, _min_dy: uint256, _receiver: address) -> uint256:
+    ...
+
+@external
+def exchange_received(i: int128, j: int128, _dx: uint256, _min_dy: uint256, _receiver: address) -> uint256:
+    ...
+
+@external
+def add_liquidity(_amounts: DynArray[uint256, 8], _min_mint_amount: uint256, _receiver: address) -> uint256:
+    ...
+
+@external
+def remove_liquidity_one_coin(_burn_amount: uint256, i: int128, _min_received: uint256, _receiver: address) -> uint256:
+    ...
+
+@external
+def remove_liquidity_imbalance(_amounts: DynArray[uint256, 8], _max_burn_amount: uint256, _receiver: address) -> uint256:
+    ...
+
+@external
+def remove_liquidity(_burn_amount: uint256, _min_amounts: DynArray[uint256, 8], _receiver: address, _claim_admin_fees: bool) -> DynArray[uint256, 8]:
+    ...
+
+@external
+def withdraw_admin_fees():
+    ...
+
+@view
+@external
+def last_price(i: uint256) -> uint256:
+    ...
+
+@view
+@external
+def ema_price(i: uint256) -> uint256:
+    ...
+
+@view
+@external
+def get_p(i: uint256) -> uint256:
+    ...
+
+@view
+@external
+def price_oracle(i: uint256) -> uint256:
+    ...
+
+@view
+@external
+def D_oracle() -> uint256:
+    ...
+
+@external
+def transfer(_to: address, _value: uint256) -> bool:
+    ...
+
+@external
+def transferFrom(_from: address, _to: address, _value: uint256) -> bool:
+    ...
+
+@external
+def approve(_spender: address, _value: uint256) -> bool:
+    ...
+
+@external
+def permit(_owner: address, _spender: address, _value: uint256, _deadline: uint256, _v: uint8, _r: bytes32, _s: bytes32) -> bool:
+    ...
+
+@view
+@external
+def DOMAIN_SEPARATOR() -> bytes32:
+    ...
+
+@view
+@external
+def get_dx(i: int128, j: int128, dy: uint256) -> uint256:
+    ...
+
+@view
+@external
+def get_dy(i: int128, j: int128, dx: uint256) -> uint256:
+    ...
+
+@view
+@external
+def calc_withdraw_one_coin(_burn_amount: uint256, i: int128) -> uint256:
+    ...
+
+@view
+@external
+def totalSupply() -> uint256:
+    ...
+
+@view
+@external
+def get_virtual_price() -> uint256:
+    ...
+
+@view
+@external
+def calc_token_amount(_amounts: DynArray[uint256, 8], _is_deposit: bool) -> uint256:
+    ...
+
+@view
+@external
+def A() -> uint256:
+    ...
+
+@view
+@external
+def A_precise() -> uint256:
+    ...
+
+@view
+@external
+def balances(i: uint256) -> uint256:
+    ...
+
+@view
+@external
+def get_balances() -> DynArray[uint256, 8]:
+    ...
+
+@view
+@external
+def stored_rates() -> DynArray[uint256, 8]:
+    ...
+
+@view
+@external
+def dynamic_fee(i: int128, j: int128) -> uint256:
+    ...
+
+@external
+def ramp_A(_future_A: uint256, _future_time: uint256):
+    ...
+
+@external
+def stop_ramp_A():
+    ...
+
+@external
+def set_new_fee(_new_fee: uint256, _new_offpeg_fee_multiplier: uint256):
+    ...
+
+@external
+def set_ma_exp_time(_ma_exp_time: uint256, _D_ma_time: uint256):
+    ...
+
+@view
+@external
+def N_COINS() -> uint256:
+    ...
+
+@view
+@external
+def coins(arg0: uint256) -> address:
+    ...
+
+@view
+@external
+def fee() -> uint256:
+    ...
+
+@view
+@external
+def offpeg_fee_multiplier() -> uint256:
+    ...
+
+@view
+@external
+def admin_fee() -> uint256:
+    ...
+
+@view
+@external
+def initial_A() -> uint256:
+    ...
+
+@view
+@external
+def future_A() -> uint256:
+    ...
+
+@view
+@external
+def initial_A_time() -> uint256:
+    ...
+
+@view
+@external
+def future_A_time() -> uint256:
+    ...
+
+@view
+@external
+def admin_balances(arg0: uint256) -> uint256:
+    ...
+
+@view
+@external
+def ma_exp_time() -> uint256:
+    ...
+
+@view
+@external
+def D_ma_time() -> uint256:
+    ...
+
+@view
+@external
+def ma_last_time() -> uint256:
+    ...
+
+@view
+@external
+def name() -> String[64]:
+    ...
+
+@view
+@external
+def symbol() -> String[32]:
+    ...
+
+@view
+@external
+def decimals() -> uint8:
+    ...
+
+@view
+@external
+def version() -> String[8]:
+    ...
+
+@view
+@external
+def balanceOf(arg0: address) -> uint256:
+    ...
+
+@view
+@external
+def allowance(arg0: address, arg1: address) -> uint256:
+    ...
+
+@view
+@external
+def nonces(arg0: address) -> uint256:
+    ...
+
+@view
+@external
+def salt() -> bytes32:
+    ...

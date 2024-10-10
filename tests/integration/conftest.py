@@ -1,5 +1,4 @@
 import os
-
 import address_book as ab
 import boa
 import pytest
@@ -90,3 +89,89 @@ def rewards_handler(vault):
     )
     vault.set_role(rh, 2**11 | 2**5 | 2**0, sender=ab.dao_agent)
     return rh
+
+
+@pytest.fixture(scope="module")
+def dev_address():
+    return boa.env.generate_address()
+
+
+@pytest.fixture(scope="module")
+def all_stablecoins():
+    return [ab.dai, ab.usdt, ab.usdc, ab.usde, ab.frax]
+
+
+@pytest.fixture(scope="module")
+def all_yield_stables():
+    return [ab.sdai, ab.sfrax, ab.susde]
+
+
+@pytest.fixture(scope="module")
+def all_cryptos():
+    return [ab.weth, ab.steth, ab.wbtc, ab.tbtc]
+
+
+@pytest.fixture(scope="module")
+def stableswap_pool(request, vault, dev_address):
+    factory = boa.from_etherscan(ab.factory_stableswap_ng, "factory_stableswap_ng")
+
+    # Retrieve token addresses and asset types from request.param
+    token_combo = request.param
+    coins = [vault.address] + [token["address"] for token in token_combo]
+    asset_types = [3] + [token.get("asset_type") for token in token_combo]
+
+    pool_size = 2
+    A = 2000
+    fee = 1000000
+    ma_exp_time = 866
+    implementation_idx = 0
+    method_ids = [b""] * pool_size
+    oracles = ["0x0000000000000000000000000000000000000000"] * pool_size
+    OFFPEG_FEE_MULTIPLIER = 20000000000
+
+    with boa.env.prank(dev_address):
+        pool = factory.deploy_plain_pool(
+            "pool_name",
+            "POOL",
+            coins,
+            A,
+            fee,
+            OFFPEG_FEE_MULTIPLIER,
+            ma_exp_time,
+            implementation_idx,
+            asset_types,
+            method_ids,
+            oracles,
+        )
+    pool_interface = boa.load_vyi("tests/integration/interfaces/CurveStableSwapNG.vyi")
+
+    return pool_interface.at(pool)
+
+
+@pytest.fixture
+def add_liquidity(request, vault, dev_address):
+    """Fixture to add liquidity to a deployed pool."""
+
+    # Retrieve token addresses and asset types from request.param
+    token_combo = request.param
+    paired_tokens = [token["address"] for token in token_combo]
+    token_contracts = [vault] + [boa.from_etherscan(token, "token") for token in paired_tokens]
+    decimals = [token.decimals() for token in token_contracts]
+
+    # Fund `dev_address` with each token
+    for i, token in enumerate(token_contracts):
+        boa.deal(token, dev_address, 10_000_000 * 10 ** decimals[i])
+
+    # # Call add_liquidity from alice's account
+    # with boa.env.prank(alice):
+    #     stableswap_pool.add_liquidity([deposit_amount] * n_coins, 0)  # Use 0 for min_mint_amount
+
+    return stableswap_pool  # Return pool with added liquidity
+
+
+@pytest.fixture(scope="module")
+def twocrypto_pool(vault, pair_cryptocoin): ...
+
+
+@pytest.fixture(scope="module")
+def tricrypto_pool(vault): ...
