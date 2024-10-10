@@ -1,0 +1,80 @@
+# Events
+
+event SetReceivers:
+    pass
+event LivenessProtectionTriggered:
+    pass
+event FeeDispatched:
+    receiver: address
+    weight: uint256
+event OwnershipTransferred:
+    previous_owner: address
+    new_owner: address
+
+# Structs
+
+struct Receiver:
+    addr: address
+    weight: uint256
+
+# Functions
+
+@external
+def transfer_ownership(new_owner: address):
+    ...
+
+@external
+def renounce_ownership():
+    ...
+
+@view
+@external
+def owner() -> address:
+    ...
+
+@external
+def update_controllers():
+    ...
+
+@view
+@external
+def n_controllers() -> uint256:
+    ...
+
+@view
+@external
+def allowed_controllers(arg0: address) -> bool:
+    ...
+
+@view
+@external
+def controllers(arg0: uint256) -> address:
+    ...
+
+@external
+def dispatch_fees(controllers: DynArray[address, 50]):
+    ...
+
+@external
+def set_receivers(receivers: DynArray[Receiver, 100]):
+    ...
+
+@view
+@external
+def excess_receiver() -> address:
+    ...
+
+@view
+@external
+def n_receivers() -> uint256:
+    ...
+
+@view
+@external
+def version() -> String[8]:
+    ...
+
+@view
+@external
+def receivers(arg0: uint256) -> Receiver:
+    ...
