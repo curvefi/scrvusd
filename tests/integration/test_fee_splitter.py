@@ -7,6 +7,8 @@ def test_fee_splitter(fee_splitter, rewards_handler, crvusd, vault):
     # =============== SETUP ===============
     # As the vote has not yet passed to add the rewards_handler as a receiver
     # we need to set the receivers manually
+    time = vault.profitMaxUnlockTime()
+    rewards_handler.eval(f"self.distribution_time = {time}")
 
     assert crvusd.balanceOf(ab.crvusd_fee_collector) == 0
     assert crvusd.balanceOf(rewards_handler.address) == 0

@@ -79,7 +79,7 @@ def vault(vault_factory):
 
 @pytest.fixture(scope="module")
 def rewards_handler(vault):
-    return boa.load(
+    rh = boa.load(
         "contracts/RewardsHandler.vy",
         ab.crvusd,
         vault,
@@ -88,3 +88,5 @@ def rewards_handler(vault):
         ab.crvusd_controller_factory,
         ab.dao_agent,
     )
+    vault.set_role(rh, 2**11 | 2**5 | 2**0, sender=ab.dao_agent)
+    return rh
