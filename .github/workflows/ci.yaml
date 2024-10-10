@@ -37,13 +37,6 @@ jobs:
       - name: Set up Python 3.12.6
         run: uv python install 3.12.6
 
-      # Restore LevelDB Cache for titanoboa
-      - name: Restore LevelDB Cache
-        uses: actions/cache@v4
-        with:
-          path: /home/runner/.cache/titanoboa
-          key: titanoboa-cache-${{ runner.os }}-${{ hashFiles('tests/integration/conftest.py', 'tests/integration/address_book.py') }}
-
       # Ensure Titanoboa Cache Directory Exists
       - name: Create Cache Directory
         run: mkdir -p /home/runner/.cache/titanoboa
@@ -58,10 +51,3 @@ jobs:
           ETH_RPC_URL: ${{ secrets.ETH_RPC_URL }}
           ETHERSCAN_API_KEY: ${{ secrets.ETHERSCAN_API_KEY }}
         run: uv run pytest -n auto
-
-      # Save LevelDB Cache after tests
-      - name: Save LevelDB Cache
-        uses: actions/cache@v4
-        with:
-          path: /home/runner/.cache/titanoboa
-          key: titanoboa-cache-${{ runner.os }}-${{ hashFiles('tests/integration/conftest.py', 'tests/integration/address_book.py') }}
