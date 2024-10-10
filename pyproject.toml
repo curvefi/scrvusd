@@ -20,7 +20,7 @@ titanoboa = { git = "https://github.com/vyperlang/titanoboa.git", rev = "86df893
 dev = [
     "mamushi==0.0.4a3",
     "pre-commit==3.8.0",
-    "black==24.8.0",
+    "ruff==0.6.9",
     "pytest==8.2.2",
     "pytest-xdist==3.6.1",
 ]
@@ -31,9 +31,8 @@ scripts = [
     "python-dotenv==1.0.1",
 ]
 
-[tool.black]
-line-length    = 100
-target_version = ["py312"]
+[tool.ruff]
+line-length = 100
 
 [build-system]
 requires = ["setuptools", "wheel"]
