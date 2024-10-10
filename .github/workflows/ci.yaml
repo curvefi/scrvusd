@@ -10,6 +10,14 @@ jobs:
       - uses: actions/checkout@v4
       - uses: astral-sh/ruff-action@v1
 
+      - name: Set up Python 3.12.6
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.12.6
+
+      # Run pre-commit hooks (e.g., black, flake8, isort)
+      - uses: pre-commit/action@v3.0.0
+
   # Test runs
   tests:
     runs-on: ubuntu-latest
