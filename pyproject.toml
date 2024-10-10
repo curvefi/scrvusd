@@ -10,9 +10,7 @@ requires-python = ">=3.10"
 dependencies = [
     "vyper>=0.4.0",
     "snekmate==0.1.0",
-    "titanoboa",
-    "plyvel-ci==1.5.1",
-    # Keep this as a placeholder in the dependencies array
+    "titanoboa",       # Keep this as a placeholder in the dependencies array
 ]
 
 [tool.uv.sources]
