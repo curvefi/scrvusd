@@ -42,7 +42,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: /home/runner/.cache/titanoboa
-          key: titanoboa-cache-${{ runner.os }}-${{ hashFiles('requirements.txt', 'pyproject.toml') }}
+          key: titanoboa-cache-${{ runner.os }}-${{ hashFiles('tests/integration/conftest.py', 'tests/integration/address_book.py') }}
 
       # Ensure Titanoboa Cache Directory Exists
       - name: Create Cache Directory
@@ -64,4 +64,4 @@ jobs:
         uses: actions/cache@v4
         with:
           path: /home/runner/.cache/titanoboa
-          key: titanoboa-cache-${{ runner.os }}-${{ hashFiles('requirements.txt', 'pyproject.toml') }}
+          key: titanoboa-cache-${{ runner.os }}-${{ hashFiles('tests/integration/conftest.py', 'tests/integration/address_book.py') }}
