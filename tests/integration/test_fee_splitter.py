@@ -3,24 +3,13 @@ import boa
 import address_book as ab
 
 
-def test_fee_splitter(fee_splitter, rewards_handler, crvusd, vault):
+def test_fee_splitter(fee_splitter, rewards_handler, crvusd, vault, active_controllers):
     # =============== SETUP ===============
     # As the vote has not yet passed to add the rewards_handler as a receiver
     # we need to set the receivers manually
-    time = vault.profitMaxUnlockTime()
-    rewards_handler.eval(f"self.distribution_time = {time}")
 
     assert crvusd.balanceOf(ab.crvusd_fee_collector) == 0
     assert crvusd.balanceOf(rewards_handler.address) == 0
-
-    receivers = [
-        # dao receives 10% less in this test
-        (ab.crvusd_fee_collector, 9_000),
-        # we add the rewards_handler as a receiver
-        (rewards_handler.address, 1_000),
-    ]
-
-    fee_splitter.set_receivers(receivers, sender=ab.dao_agent)
 
     # ============== SOME DEPOSITS JOIN THE VAULT ==============
     alice = boa.env.generate_address("alice")
@@ -41,14 +30,27 @@ def test_fee_splitter(fee_splitter, rewards_handler, crvusd, vault):
     # ============== DISPATCH FEES ==============
 
     # we skip the first one as the market is deprecated
-    controllers = [fee_splitter.controllers(i) for i in range(1, 6)]
-
-    fee_splitter.dispatch_fees(controllers)
+    fee_splitter.dispatch_fees(active_controllers)
 
     # sanity check that fees have been dispatched correctly
-    # fee_collector_after = crvusd.balanceOf(ab.crvusd_fee_collector)
-    # rewards_handler_after = crvusd.balanceOf(rewards_handler.address)
 
-    # assert fee_collector_after/rewards_handler_after == 9_000/1_000
+    # ================= PROCESS REWARDS =================
 
     rewards_handler.process_rewards()
+
+    # just a dummy placeholder that will have 0 crvUSD
+    prev_d = boa.env.generate_address()
+
+    for d in depositors:
+        boa.deal(crvusd, d, 100_000_000 * 10**18)
+        # withdraw the same amount as it was deposited
+        vault.approve(vault.address, deposit_amount, sender=d)
+        # deposit amount = shares when conversion rate is 1:1
+        vault.redeem(deposit_amount, d, d, sender=d)
+
+        # roughly 1 withdrawal every two days
+        boa.env.time_travel(seconds=86400 * 2)
+
+        assert vault.balanceOf(d) == 0
+        # depositors that withdrew later should accrue more rewards
+        assert crvusd.balanceOf(d) > crvusd.balanceOf(prev_d)
