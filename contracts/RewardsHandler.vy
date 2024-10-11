@@ -251,9 +251,8 @@ def weight() -> uint256:
     for more at the beginning and can also be increased in the future if someone
     tries to manipulate the time-weighted average of the tvl ratio.
     """
-    return max(
-        twa._compute() * self.scaling_factor // MAX_BPS, self.minimum_weight
-    )
+    raw_weight: uint256 = twa._compute() * self.scaling_factor // MAX_BPS
+    return max(raw_weight, self.minimum_weight)
 
 
 ################################################################
