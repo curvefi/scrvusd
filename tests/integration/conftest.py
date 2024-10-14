@@ -4,7 +4,7 @@ import boa
 import pytest
 
 boa.set_etherscan(api_key=os.getenv("ETHERSCAN_API_KEY"))
-BOA_CACHE = False
+BOA_CACHE = True
 
 
 @pytest.fixture(autouse=True)
