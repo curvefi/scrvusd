@@ -7,19 +7,19 @@ boa.set_etherscan(api_key=os.getenv("ETHERSCAN_API_KEY"))
 BOA_CACHE = False
 
 
-@pytest.fixture(autouse=True, scope="module")
+@pytest.fixture(autouse=True)
 def better_traces(forked_env):
     # contains contracts that are not necessarily called
     # but appear in the traces
     boa.from_etherscan(ab.vault_original, "vault_original")
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture()
 def rpc_url():
     return os.getenv("ETH_RPC_URL") or "https://rpc.ankr.com/eth"
 
 
-@pytest.fixture(scope="module", autouse=True)
+@pytest.fixture(autouse=True)
 def forked_env(rpc_url):
     block_to_fork = 20928372
     with boa.swap_env(boa.Env()):
@@ -31,22 +31,22 @@ def forked_env(rpc_url):
         yield
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture()
 def controller_factory():
     return boa.from_etherscan(ab.crvusd_controller_factory, "controller_factory")
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture()
 def lens(controller_factory):
     return boa.load("contracts/StablecoinLens.vy", controller_factory)
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture()
 def vault_factory():
     return boa.from_etherscan(ab.yearn_vault_factory, "vault_factory")
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture()
 def fee_splitter(rewards_handler):
     _fee_splitter_abi = boa.load_vyi("tests/integration/interfaces/IFeeSplitter.vyi")
 
@@ -67,12 +67,12 @@ def fee_splitter(rewards_handler):
     return _fee_splitter
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture()
 def crvusd():
     return boa.from_etherscan(ab.crvusd, "crvusd")
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture()
 def vault(vault_factory):
     _vault_abi = boa.load_partial("contracts/yearn/VaultV3.vy")
 
@@ -95,12 +95,12 @@ def vault(vault_factory):
     return _vault
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture()
 def minimum_weight():
     return 500
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture()
 def rewards_handler(vault, minimum_weight):
     rh = boa.load(
         "contracts/RewardsHandler.vy",
@@ -120,12 +120,7 @@ def rewards_handler(vault, minimum_weight):
     return rh
 
 
-@pytest.fixture(scope="module")
-def dev_address():
-    return boa.env.generate_address()
-
-
-@pytest.fixture(scope="module")
+@pytest.fixture()
 def active_controllers(fee_splitter):
     # useful to call dispatch_fees
     # we skip the first one as the market is deprecated

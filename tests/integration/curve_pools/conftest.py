@@ -3,22 +3,27 @@ import boa
 import pytest
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture()
 def alice():
     return boa.env.generate_address()
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture()
+def dev_address():
+    return boa.env.generate_address()
+
+
+@pytest.fixture()
 def crvusd_init_balance():
     return 1_000 * 10**18
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture()
 def stableswap_factory():
     return boa.from_etherscan(ab.factory_stableswap_ng, "factory_stableswap_ng")
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture()
 def paired_tokens(request):
     # This fixture is used to get upstream parametrization and populate the contracts
     # Retrieve paired token combination [token1, token2] via request.param
@@ -30,7 +35,7 @@ def paired_tokens(request):
     return tokens_list
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture()
 def pool_tokens(paired_tokens, vault):
     # in any pool first is scrvusd, then one or two other tokens
     return [
@@ -45,7 +50,7 @@ def pool_tokens(paired_tokens, vault):
     ]
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def stableswap_pool(stableswap_factory, vault, dev_address, pool_tokens):
     # Retrieve token addresses and asset types from request.param
     coins = [token["address"] for token in pool_tokens]
@@ -108,9 +113,9 @@ def stableswap_pool(stableswap_factory, vault, dev_address, pool_tokens):
     return pool
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def twocrypto_pool(vault, pair_cryptocoin): ...
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def tricrypto_pool(vault): ...
