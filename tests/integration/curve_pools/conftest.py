@@ -106,16 +106,5 @@ def stableswap_pool(stableswap_factory, vault, dev_address, pool_tokens):
         # Approve pool to spend vault tokens
         token["contract"].approve(pool, 2**256 - 1, sender=dev_address)
         dev_balances.append(token["contract"].balanceOf(dev_address))
-    # print(f"{[token["name"] for token in pool_tokens]}")
-    # print(f" vault balance: {vault.balanceOf(dev_address)/1e18}")
-    # print(f" vault supply: {vault.totalSupply()/1e18}")
     pool.add_liquidity(dev_balances, 0, dev_address, sender=dev_address)
     return pool
-
-
-@pytest.fixture()
-def twocrypto_pool(vault, pair_cryptocoin): ...
-
-
-@pytest.fixture()
-def tricrypto_pool(vault): ...
