@@ -30,8 +30,6 @@ def test_accrue_value(alice, dev_address, vault, crvusd, crvusd_init_balance):
 
     # check alice's assets value increased
     alice_value_1 = vault.convertToAssets(vault.balanceOf(alice))
-    print(f"alice_value_0: {alice_value_0}")
-    print(f"alice_value_1: {alice_value_1}")
     assert alice_value_1 > alice_value_0
     assert alice_value_1 == alice_value_0 + crvusd_init_balance
 
@@ -79,9 +77,6 @@ def test_stableswap_pool_liquidity(
     # remove liq (one-sided)
     stableswap_pool.remove_liquidity_one_coin(pool_shares, 0, 0, alice, sender=alice)
     alice_value_1 = vault.convertToAssets(vault.balanceOf(alice))
-    # print(f"alice_value_0: {alice_value_0}")
-    # print(f"alice_value_1: {alice_value_1}")
-    # print(f"pool_shares: {vault.convertToAssets(vault.balanceOf(stableswap_pool))}")
 
     alice_expected_full_reward = alice_rate * amt_reward
     # because we deposited LP, we only get 1/N_COINS of the reward (50% or 33% for 2, 3 coins)
@@ -110,7 +105,6 @@ def test_stableswap_pool_prices_with_vault_growth(
     airdropper = boa.env.generate_address()
     decimals = [token["decimals"] for token in pool_tokens]
     prev_dy = [stableswap_pool.get_dy(0, i, 10 ** decimals[0]) for i in range(1, n_coins)]
-    print(vault.totalAssets() / 1e18)
     # Iteratively grow vault and adjust pool prices
     for _ in range(10):  # Run 10 iterations
         # Step 1: Inflate vault by 1%
