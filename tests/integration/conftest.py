@@ -47,9 +47,24 @@ def vault_factory():
 
 
 @pytest.fixture(scope="module")
-def fee_splitter():
-    _factory = boa.load_vyi("tests/integration/interfaces/IFeeSplitter.vyi")
-    return _factory.at(ab.fee_splitter)
+def fee_splitter(rewards_handler):
+    _fee_splitter_abi = boa.load_vyi("tests/integration/interfaces/IFeeSplitter.vyi")
+
+    _fee_splitter = _fee_splitter_abi.at(ab.fee_splitter)
+
+    receivers = [
+        # we add the rewards_handler as a receiver
+        (rewards_handler.address, 1_000),
+        # dao receives 10% less than what it currently does
+        # and it the excess receiver
+        (ab.crvusd_fee_collector, 9_000),
+    ]
+
+    assert _fee_splitter.excess_receiver() == ab.crvusd_fee_collector
+
+    _fee_splitter.set_receivers(receivers, sender=ab.dao_agent)
+
+    return _fee_splitter
 
 
 @pytest.fixture(scope="module")
@@ -65,7 +80,6 @@ def vault(vault_factory):
         ab.crvusd,
         "Savings crvUSD",
         "scrvUSD",
-        # TODO figure out who's going to be the role manager
         ab.dao_agent,
         86400 * 7,  # 1 week
     )
@@ -75,24 +89,44 @@ def vault(vault_factory):
     # give the dao total control over the vault
     _vault.set_role(ab.dao_agent, int("11111111111111", 2), sender=ab.dao_agent)
     _vault.set_deposit_limit(2**256 - 1, sender=ab.dao_agent)
+    # monkeypatch the contract_name
+    _vault.contract_name = "scrvUSD"
+
     return _vault
 
 
-@pytest.fixture(scope="function")
-def rewards_handler(vault):
+@pytest.fixture(scope="module")
+def minimum_weight():
+    return 500
+
+
+@pytest.fixture(scope="module")
+def rewards_handler(vault, minimum_weight):
     rh = boa.load(
         "contracts/RewardsHandler.vy",
         ab.crvusd,
         vault,
-        500,  # 5%
+        minimum_weight,  # 5%
         10_000,  # 1
         ab.crvusd_controller_factory,
         ab.dao_agent,
     )
     vault.set_role(rh, 2**11 | 2**5 | 2**0, sender=ab.dao_agent)
+
+    # TODO how to enforce this in prod?
+    time = vault.profitMaxUnlockTime()
+    rh.eval(f"self.distribution_time = {time}")
+
     return rh
 
 
 @pytest.fixture(scope="module")
 def dev_address():
     return boa.env.generate_address()
+
+
+@pytest.fixture(scope="module")
+def active_controllers(fee_splitter):
+    # useful to call dispatch_fees
+    # we skip the first one as the market is deprecated
+    return [fee_splitter.controllers(i) for i in range(1, 6)]
