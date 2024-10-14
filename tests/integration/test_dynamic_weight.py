@@ -36,12 +36,14 @@ def test_fee_splitter_cap(
     # test were we ask for so much that we hit the cap
     fee_splitter_cap = fee_splitter.receivers(0)[1]
 
+    circulating_supply = rewards_handler.eval("lens._circulating_supply()")
+
     # with the supply at the time of the fork
     # if we deposit 10_000_000 crvUSD in the vault
     # the weight asked will roughly be 16% (1600 bps)
     # which is above than the fee splitter cap of 10%
     # so the weight should be clamped to 1000 bps
-    deposit_amount = 10_000_000 * 10**18
+    deposit_amount = int(circulating_supply * 0.16)
 
     new_depositor(deposit_amount)
 
