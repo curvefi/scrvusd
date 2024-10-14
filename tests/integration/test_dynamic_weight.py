@@ -161,7 +161,6 @@ def test_dynamic_weight_depositors(
             depositor_shares = vault.balanceOf(d)
             assert depositor_shares > 0
 
-            vault.approve(vault.address, depositor_shares)
             vault.redeem(depositor_shares, d, d)
 
             # roughly 1 withdrawal every day
