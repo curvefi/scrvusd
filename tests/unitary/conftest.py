@@ -1,5 +1,4 @@
 import boa
-import boa_solidity  # noqa: F401
 import pytest
 
 MOCK_CRV_USD_CIRCULATING_SUPPLY = 69_420_000 * 10**18
@@ -12,17 +11,36 @@ def yearn_gov():
 
 @pytest.fixture(scope="module")
 def curve_dao():
+    # TODO add a fixture for rate managers that contains curve dao
     return boa.env.generate_address()
 
 
 @pytest.fixture(scope="module")
-def deployer():
+def dev_address():
     return boa.env.generate_address()
+
+
+@pytest.fixture(scope="module")
+def security_agent():
+    return boa.env.generate_address()
+
+
+@pytest.fixture(scope="module")
+def vault_init_deposit_cap():
+    return 5_000_000 * 10**18
+
+
+@pytest.fixture(scope="module")
+def deposit_limit_module(dev_address, crvusd, vault, vault_init_deposit_cap):
+    contract_deployer = boa.load_partial("contracts/DepositLimitModule.vy")
+    with boa.env.prank(dev_address):
+        contract = contract_deployer(vault, vault_init_deposit_cap)
+    return contract
 
 
 @pytest.fixture(scope="module")
 def vault_original():
-    return boa.load("contracts/yearn/Vault.vy")
+    return boa.load("contracts/yearn/VaultV3.vy")
 
 
 @pytest.fixture(scope="module")
@@ -46,21 +64,15 @@ def role_manager():
 
 
 @pytest.fixture(scope="module")
-def vault(vault_factory, crvusd, role_manager, dummy_strategy):
-    vault_deployer = boa.load_partial("contracts/yearn/Vault.vy")
+def vault(vault_factory, crvusd, role_manager, dev_address):
+    vault_deployer = boa.load_partial("contracts/yearn/VaultV3.vy")
 
-    address = vault_factory.deploy_new_vault(crvusd, "Staked crvUSD", "st-crvUSD", role_manager, 0)
+    with boa.env.prank(dev_address):
+        address = vault_factory.deploy_new_vault(
+            crvusd, "Staked crvUSD", "st-crvUSD", role_manager, 0
+        )
 
-    vault = vault_deployer.at(address)
-
-    # creata a local god to avoid recursive dependencies in fixtures
-    _god = boa.env.generate_address()
-
-    vault.set_role(_god, int("11111111111111", 2), sender=role_manager)
-
-    vault.add_strategy(dummy_strategy, sender=_god)  # TODO figure out queue
-
-    return vault
+    return vault_deployer.at(address)
 
 
 @pytest.fixture(scope="module")
@@ -114,42 +126,21 @@ def mock_peg_keeper():
 
 @pytest.fixture(scope="module")
 def rewards_handler(
-    vault, crvusd, role_manager, minimum_weight, scaling_factor, mock_controller_factory, curve_dao
+    vault,
+    crvusd,
+    role_manager,
+    minimum_weight,
+    scaling_factor,
+    mock_controller_factory,
+    curve_dao,
+    dev_address,
 ):
-    print(crvusd, vault, minimum_weight, scaling_factor, mock_controller_factory, curve_dao)
-    rh = boa.load(
-        "contracts/RewardsHandler.vy",
-        crvusd,
-        vault,
-        minimum_weight,
-        scaling_factor,
-        mock_controller_factory,
-        curve_dao,
-    )
+    rewards_handler_deployer = boa.load_partial("contracts/RewardsHandler.vy")
+    with boa.env.prank(dev_address):
+        rh = rewards_handler_deployer(
+            crvusd, vault, minimum_weight, scaling_factor, mock_controller_factory, curve_dao
+        )
+
     vault.set_role(rh, 2**11 | 2**5 | 2**0, sender=role_manager)
 
     return rh
-
-
-@pytest.fixture(scope="module")
-def solc_args():
-    return {
-        "optimize": True,
-        "optimize_runs": 200,
-    }
-
-
-@pytest.fixture(scope="module")
-def tokenized_strategy(solc_args, vault_factory):
-    deployer = boa.load_partial_solc(
-        "contracts/yearn/TokenizedStrategy.sol", compiler_args=solc_args
-    )
-    return deployer.deploy(
-        vault_factory.address, override_address="0x2e234DAe75C793f67A35089C9d99245E1C58470b"
-    )
-
-
-@pytest.fixture(scope="module")
-def dummy_strategy(solc_args, crvusd, tokenized_strategy):
-    deployer = boa.load_partial_solc("contracts/yearn/DummyStrategy.sol", compiler_args=solc_args)
-    return deployer.deploy(crvusd.address, "dummy")

@@ -3,22 +3,20 @@ name: CI Workflow
 on: [push]
 
 jobs:
-
   # Linting with Pre-commit
-  lint:
+  ruff:
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+      - uses: astral-sh/ruff-action@v1
 
-      - name: Setup Python 3.12.6
+      - name: Set up Python 3.12.6
         uses: actions/setup-python@v5
         with:
           python-version: 3.12.6
 
       # Run pre-commit hooks (e.g., black, flake8, isort)
       - uses: pre-commit/action@v3.0.0
-
 
   # Test runs
   tests:
@@ -28,31 +26,24 @@ jobs:
       fail-fast: false
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      # Install Solidity compiler (solc)
-      - name: Install solc
-        run: |
-          sudo add-apt-repository -y ppa:ethereum/ethereum
-          sudo apt-get update
-          sudo apt-get install -y solc
-
-      # install poetry to allow cacheing
-      - name: Install poetry
-        run: pipx install poetry
-
-      - name: Setup Python 3.12.6
-        uses: actions/setup-python@v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
         with:
-          python-version: 3.12.6
-          cache: 'poetry'
+          version: "0.4.18"
+          enable-cache: true  # Enables built-in caching for uv
+
+      - name: Set up Python 3.12.6
+        run: uv python install 3.12.6
+
+      # Install dependencies with all extras (including dev)
       - name: Install Requirements
-        run: |
-          poetry config virtualenvs.in-project true
-          poetry install
+        run: uv sync --extra=dev
+
+      # Run tests with environment variables
       - name: Run Tests
         env:
           ETH_RPC_URL: ${{ secrets.ETH_RPC_URL }}
           ETHERSCAN_API_KEY: ${{ secrets.ETHERSCAN_API_KEY }}
-        run: |
-          poetry run pytest -n auto
+        run: uv run pytest -n auto
