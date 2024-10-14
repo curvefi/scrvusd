@@ -1,8 +1,8 @@
 import boa
 
 
-def test_default_behavior(rewards_handler, curve_dao):
-    rewards_handler.set_distribution_time(1234, sender=curve_dao)
+def test_default_behavior(rewards_handler, rate_manager):
+    rewards_handler.set_distribution_time(1234, sender=rate_manager)
 
     assert rewards_handler.distribution_time() == 1234
 

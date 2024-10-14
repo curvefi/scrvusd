@@ -1,8 +1,8 @@
 import boa
 
 
-def test_default_behavior(rewards_handler, curve_dao):
-    rewards_handler.set_scaling_factor(12_000, sender=curve_dao)  # 20% boost
+def test_default_behavior(rewards_handler, rate_manager):
+    rewards_handler.set_scaling_factor(12_000, sender=rate_manager)  # 20% boost
     events = rewards_handler.get_logs()
 
     # Verify event emission

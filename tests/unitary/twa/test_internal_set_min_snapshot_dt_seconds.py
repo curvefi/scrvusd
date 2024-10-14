@@ -1,13 +1,14 @@
 import boa
 
 
-def test_default_behavior(rewards_handler, curve_dao):
+def test_default_behavior(rewards_handler, rate_manager):
     initial_min_snapshot_dt = rewards_handler.min_snapshot_dt_seconds()
 
     # Define a new min_snapshot_dt_seconds value
     new_min_snapshot_dt = initial_min_snapshot_dt + 12
 
-    with boa.env.prank(curve_dao):
+    # TODO this is not access internal (should skip role check)
+    with boa.env.prank(rate_manager):
         rewards_handler.set_twa_snapshot_dt(new_min_snapshot_dt)
         events = rewards_handler.get_logs()
     # Verify event emission

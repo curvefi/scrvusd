@@ -1,13 +1,9 @@
-import boa
-
-
-def test_default_behavior(rewards_handler, curve_dao):
+def test_default_behavior(rewards_handler):
     initial_twa_window = rewards_handler.twa_window()
     new_twa_window = initial_twa_window + 1000  # Increment by 1000 seconds
 
-    with boa.env.prank(curve_dao):
-        rewards_handler.set_twa_window(new_twa_window)
-        events = rewards_handler.get_logs()
+    rewards_handler.eval(f"twa._set_twa_window({new_twa_window})")
+    events = rewards_handler.get_logs()
 
     # Verify event emission
     assert f"TWAWindowUpdated(new_window={new_twa_window}" in repr(events)

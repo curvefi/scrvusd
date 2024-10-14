@@ -1,11 +1,11 @@
 import boa
 
 
-def test_default_behavior(rewards_handler, crvusd, vault, curve_dao):
+def test_default_behavior(rewards_handler, crvusd, vault, rate_manager):
     distributed_amount = 10**18 * 100
     boa.deal(crvusd, rewards_handler, distributed_amount)
 
-    rewards_handler.set_distribution_time(86_400 * 7, sender=curve_dao)
+    rewards_handler.set_distribution_time(86_400 * 7, sender=rate_manager)
 
     assert crvusd.balanceOf(rewards_handler) == distributed_amount
 
@@ -22,8 +22,8 @@ def test_over_time(rewards_handler):
         rewards_handler.process_rewards()
 
 
-def test_no_rewards(rewards_handler, curve_dao):
-    rewards_handler.set_distribution_time(1234, sender=curve_dao)
+def test_no_rewards(rewards_handler, rate_manager):
+    rewards_handler.set_distribution_time(1234, sender=rate_manager)
 
     with boa.reverts("no rewards to distribute"):
         rewards_handler.process_rewards()

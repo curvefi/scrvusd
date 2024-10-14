@@ -24,8 +24,8 @@ def setup_vault(vault, crvusd, vault_god, alice):
 
 
 @pytest.fixture()
-def setup_rewards_handler(rewards_handler, curve_dao, twa_window, snapshot_interval):
-    with boa.env.prank(curve_dao):
+def setup_rewards_handler(rewards_handler, rate_manager, twa_window, snapshot_interval):
+    with boa.env.prank(rate_manager):
         rewards_handler.set_twa_window(twa_window)
         rewards_handler.set_twa_snapshot_dt(snapshot_interval)
     return rewards_handler
