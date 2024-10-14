@@ -4,10 +4,6 @@ import address_book as ab
 
 
 def test_fee_splitter(fee_splitter, rewards_handler, crvusd, vault, active_controllers):
-    # =============== SETUP ===============
-    # As the vote has not yet passed to add the rewards_handler as a receiver
-    # we need to set the receivers manually
-
     assert crvusd.balanceOf(ab.crvusd_fee_collector) == 0
     assert crvusd.balanceOf(rewards_handler.address) == 0
 
@@ -54,3 +50,5 @@ def test_fee_splitter(fee_splitter, rewards_handler, crvusd, vault, active_contr
         assert vault.balanceOf(d) == 0
         # depositors that withdrew later should accrue more rewards
         assert crvusd.balanceOf(d) > crvusd.balanceOf(prev_d)
+
+        prev_d = d
