@@ -2,7 +2,7 @@ import boa
 import pytest
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture()
 def rewards_handler_deployer():
     return boa.load_partial("contracts/RewardsHandler.vy")
 
