@@ -46,7 +46,7 @@ def test_fee_splitter_cap(
     new_depositor(deposit_amount)
 
     rewards_handler.take_snapshot()
-    boa.env.time_travel(seconds=86400 * 2)
+    boa.env.time_travel(seconds=86_400 * 2)
 
     raw_weight = rewards_handler.inject.raw_weight()
 
@@ -79,7 +79,7 @@ def test_minimum_weight(rewards_handler, minimum_weight, vault, crvusd, new_depo
     new_depositor(deposit_amount)
 
     rewards_handler.take_snapshot()
-    boa.env.time_travel(seconds=86400 * 2)
+    boa.env.time_travel(seconds=86_400 * 2)
 
     raw_weight = rewards_handler.inject.raw_weight()
 
@@ -108,7 +108,7 @@ def test_dynamic_weight_depositors(
         depositors.append(depositor)
 
         # roughly 1 deposit every day
-        boa.env.time_travel(seconds=86400)
+        boa.env.time_travel(seconds=86_400)
 
         raw_weight = rewards_handler.inject.raw_weight()
         fee_splitter_cap = fee_splitter.receivers(0)[1]
@@ -152,7 +152,7 @@ def test_dynamic_weight_depositors(
     # twa would still increase during the first withdrawals
     # which is totally correct but would break some assertions
     # that expect the weight to be strictly decreasing
-    boa.env.time_travel(seconds=86400 * 7)
+    boa.env.time_travel(seconds=86_400 * 7)
 
     prev_weight = float("inf")
 
@@ -164,7 +164,7 @@ def test_dynamic_weight_depositors(
             vault.redeem(depositor_shares, d, d)
 
             # roughly 1 withdrawal every day
-            boa.env.time_travel(seconds=86400)
+            boa.env.time_travel(seconds=86_400)
             rewards_handler.take_snapshot()
 
             raw_weight = rewards_handler.inject.raw_weight()
@@ -195,7 +195,7 @@ def test_dynamic_weight_supply_changes(
 
     # update the weight
     rewards_handler.take_snapshot()
-    boa.env.time_travel(seconds=86400)
+    boa.env.time_travel(seconds=86_400)
 
     # checkpoint of the weight
     prev_weight = rewards_handler.inject.raw_weight()
@@ -212,7 +212,7 @@ def test_dynamic_weight_supply_changes(
 
     # update the weight
     rewards_handler.take_snapshot()
-    boa.env.time_travel(seconds=86400)
+    boa.env.time_travel(seconds=86_400)
 
     # make sure that the weight has decreased
     current_weight = rewards_handler.inject.raw_weight()
