@@ -5,6 +5,20 @@ import pytest
 import address_book as ab
 
 
+@pytest.fixture(scope="module")
+def new_depositor(crvusd, vault):
+    def _new_depositor(amount):
+        depositor = boa.env.generate_address()
+        boa.deal(crvusd, depositor, amount)
+
+        with boa.env.prank(depositor):
+            crvusd.approve(vault.address, amount, sender=depositor)
+            vault.deposit(amount, depositor)
+        return depositor
+
+    return _new_depositor
+
+
 @pytest.fixture(autouse=True, scope="module")
 def inject_raw_weight(rewards_handler):
     raw_weight_source = textwrap.dedent("""
@@ -16,7 +30,9 @@ def inject_raw_weight(rewards_handler):
     rewards_handler.inject_function(raw_weight_source)
 
 
-def test_fee_splitter_cap(fee_splitter, crvusd, vault, rewards_handler, active_controllers):
+def test_fee_splitter_cap(
+    fee_splitter, crvusd, vault, rewards_handler, active_controllers, new_depositor
+):
     # test were we ask for so much that we hit the cap
     fee_splitter_cap = fee_splitter.receivers(0)[1]
 
@@ -27,12 +43,7 @@ def test_fee_splitter_cap(fee_splitter, crvusd, vault, rewards_handler, active_c
     # so the weight should be clamped to 1000 bps
     deposit_amount = 10_000_000 * 10**18
 
-    alice = boa.env.generate_address()
-    boa.deal(crvusd, alice, deposit_amount)
-
-    with boa.env.prank(alice):
-        crvusd.approve(vault.address, deposit_amount)
-        vault.deposit(deposit_amount, alice)
+    new_depositor(deposit_amount)
 
     rewards_handler.take_snapshot()
     boa.env.time_travel(seconds=86400 * 2)
@@ -54,7 +65,7 @@ def test_fee_splitter_cap(fee_splitter, crvusd, vault, rewards_handler, active_c
     assert fee_collector_after / rewards_handler_after == 9_000 / 1_000
 
 
-def test_minimum_weight(rewards_handler, minimum_weight, vault, crvusd):
+def test_minimum_weight(rewards_handler, minimum_weight, vault, crvusd, new_depositor):
     # when there are no depositors in the vault we should be
     assert rewards_handler.weight() == minimum_weight
 
@@ -65,12 +76,7 @@ def test_minimum_weight(rewards_handler, minimum_weight, vault, crvusd):
     # so the weight should be clamped to 500 bps
     deposit_amount = 1_000_000 * 10**18
 
-    alice = boa.env.generate_address()
-    boa.deal(crvusd, alice, deposit_amount)
-
-    with boa.env.prank(alice):
-        crvusd.approve(vault.address, deposit_amount)
-        vault.deposit(deposit_amount, alice)
+    new_depositor(deposit_amount)
 
     rewards_handler.take_snapshot()
     boa.env.time_travel(seconds=86400 * 2)
@@ -82,7 +88,7 @@ def test_minimum_weight(rewards_handler, minimum_weight, vault, crvusd):
 
 
 def test_dynamic_weight_depositors(
-    crvusd, vault, rewards_handler, minimum_weight, fee_splitter, active_controllers
+    crvusd, vault, rewards_handler, minimum_weight, fee_splitter, active_controllers, new_depositor
 ):
     # =============== DEPOSITS ===============
     # test were as people deposit the amount asked increases
@@ -98,14 +104,8 @@ def test_dynamic_weight_depositors(
     for i in range(100):
         rewards_handler.take_snapshot()
 
-        depositor = boa.env.generate_address()
+        depositor = new_depositor(deposit_amount)
         depositors.append(depositor)
-
-        boa.deal(crvusd, depositor, deposit_amount)
-
-        with boa.env.prank(depositor):
-            crvusd.approve(vault.address, deposit_amount)
-            vault.deposit(deposit_amount, depositor)
 
         # roughly 1 deposit every day
         boa.env.time_travel(seconds=86400)
@@ -175,7 +175,9 @@ def test_dynamic_weight_depositors(
             prev_weight = raw_weight
 
 
-def test_dynamic_weight_supply_changes(controller_factory, crvusd, rewards_handler, vault):
+def test_dynamic_weight_supply_changes(
+    controller_factory, crvusd, rewards_handler, vault, new_depositor
+):
     # as the supply changes the weight asked changes
 
     # we pick one controller from which we can borrow
@@ -184,17 +186,13 @@ def test_dynamic_weight_supply_changes(controller_factory, crvusd, rewards_handl
 
     wsteth = boa.from_etherscan(wsteth_controller.collateral_token())
 
+    # Here alice takes the role of the borrower
     alice = boa.env.generate_address()
 
     # need a big depositor to make the weight go up
     # since we deal with boa this won't reduce the dynamic weight
     deposit_amount = 1_000_000 * 10**18
-    depositor = boa.env.generate_address()
-    boa.deal(crvusd, depositor, deposit_amount)
-
-    with boa.env.prank(depositor):
-        crvusd.approve(vault.address, deposit_amount)
-        vault.deposit(deposit_amount, depositor)
+    new_depositor(deposit_amount)
 
     # update the weight
     rewards_handler.take_snapshot()
