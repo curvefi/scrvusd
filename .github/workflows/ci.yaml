@@ -37,6 +37,10 @@ jobs:
       - name: Set up Python 3.12.6
         run: uv python install 3.12.6
 
+      # Ensure Titanoboa Cache Directory Exists
+      - name: Create Cache Directory
+        run: mkdir -p /home/runner/.cache/titanoboa
+
       # Install dependencies with all extras (including dev)
       - name: Install Requirements
         run: uv sync --extra=dev
