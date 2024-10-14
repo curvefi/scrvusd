@@ -4,6 +4,16 @@ import pytest
 
 
 @pytest.fixture(scope="module")
+def alice():
+    return boa.env.generate_address()
+
+
+@pytest.fixture(scope="module")
+def crvusd_init_balance():
+    return 1_000 * 10**18
+
+
+@pytest.fixture(scope="module")
 def stableswap_factory():
     return boa.from_etherscan(ab.factory_stableswap_ng, "factory_stableswap_ng")
 
@@ -11,21 +21,33 @@ def stableswap_factory():
 @pytest.fixture(scope="module")
 def paired_tokens(request):
     # This fixture is used to get upstream parametrization and populate the contracts
-    # Retrieve paired token combinations via request.param
+    # Retrieve paired token combination [token1, token2] via request.param
     tokens_list = request.param
     # update the dict with contracts
     for token in tokens_list:
         token["contract"] = boa.from_etherscan(token["address"], token["name"])
+        token["decimals"] = token["contract"].decimals()
     return tokens_list
 
 
 @pytest.fixture(scope="module")
-def stableswap_pool(stableswap_factory, vault, dev_address, paired_tokens):
-    # Retrieve token addresses and asset types from request.param
-    pool_tokens = [
-        {"asset_type": 3, "name": "scrvusd", "address": vault.address, "contract": vault},
+def pool_tokens(paired_tokens, vault):
+    # in any pool first is scrvusd, then one or two other tokens
+    return [
+        {
+            "name": "scrvusd",
+            "address": vault.address,
+            "contract": vault,
+            "asset_type": 3,
+            "decimals": 18,
+        },
         *paired_tokens,
     ]
+
+
+@pytest.fixture(scope="function")
+def stableswap_pool(stableswap_factory, vault, dev_address, pool_tokens):
+    # Retrieve token addresses and asset types from request.param
     coins = [token["address"] for token in pool_tokens]
     asset_types = [token.get("asset_type") for token in pool_tokens]
 
@@ -34,8 +56,7 @@ def stableswap_pool(stableswap_factory, vault, dev_address, paired_tokens):
     A, fee, ma_exp_time, implementation_idx = (2000, 1000000, 866, 0)
     method_ids = [b""] * pool_size
     oracles = ["0x0000000000000000000000000000000000000000"] * pool_size
-    OFFPEG_FEE_MULTIPLIER = 20000000000
-
+    offpeg_fee_mp = 20000000000
     # deploy pool
     with boa.env.prank(dev_address):
         pool_address = stableswap_factory.deploy_plain_pool(
@@ -44,7 +65,7 @@ def stableswap_pool(stableswap_factory, vault, dev_address, paired_tokens):
             coins,
             A,
             fee,
-            OFFPEG_FEE_MULTIPLIER,
+            offpeg_fee_mp,
             ma_exp_time,
             implementation_idx,
             asset_types,
@@ -58,9 +79,7 @@ def stableswap_pool(stableswap_factory, vault, dev_address, paired_tokens):
     dev_balances = []
     for token in pool_tokens:
         if token["asset_type"] == 0:
-            boa.deal(
-                token["contract"], dev_address, AMOUNT_STABLE * 10 ** token["contract"].decimals()
-            )
+            boa.deal(token["contract"], dev_address, AMOUNT_STABLE * 10 ** token["decimals"])
         elif token["asset_type"] == 3:
             underlying_token = token["contract"].asset()
             underlying_contract = boa.from_etherscan(underlying_token, "token")
@@ -68,7 +87,10 @@ def stableswap_pool(stableswap_factory, vault, dev_address, paired_tokens):
             boa.deal(
                 underlying_contract,
                 dev_address,
-                AMOUNT_STABLE * 10**decimals,
+                AMOUNT_STABLE * 10**decimals
+                + underlying_contract.balanceOf(
+                    dev_address
+                ),  # in case of dai + sdai deal would overwrite, so we add the previous balance
             )
             underlying_contract.approve(
                 token["contract"],
@@ -79,13 +101,16 @@ def stableswap_pool(stableswap_factory, vault, dev_address, paired_tokens):
         # Approve pool to spend vault tokens
         token["contract"].approve(pool, 2**256 - 1, sender=dev_address)
         dev_balances.append(token["contract"].balanceOf(dev_address))
+    # print(f"{[token["name"] for token in pool_tokens]}")
+    # print(f" vault balance: {vault.balanceOf(dev_address)/1e18}")
+    # print(f" vault supply: {vault.totalSupply()/1e18}")
     pool.add_liquidity(dev_balances, 0, dev_address, sender=dev_address)
     return pool
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def twocrypto_pool(vault, pair_cryptocoin): ...
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def tricrypto_pool(vault): ...

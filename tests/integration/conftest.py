@@ -4,6 +4,7 @@ import boa
 import pytest
 
 boa.set_etherscan(api_key=os.getenv("ETHERSCAN_API_KEY"))
+BOA_CACHE = False
 
 
 @pytest.fixture(autouse=True, scope="module")
@@ -13,7 +14,7 @@ def better_traces(forked_env):
     boa.from_etherscan(ab.vault_original, "vault_original")
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def rpc_url():
     return os.getenv("ETH_RPC_URL") or "https://rpc.ankr.com/eth"
 
@@ -22,9 +23,10 @@ def rpc_url():
 def forked_env(rpc_url):
     block_to_fork = 20928372
     with boa.swap_env(boa.Env()):
-        boa.fork(url=rpc_url, block_identifier=block_to_fork)
-        # use this to disable caching
-        # boa.fork(url=rpc_url, block_identifier=block_to_fork, cache_file=None)
+        if BOA_CACHE:
+            boa.fork(url=rpc_url, block_identifier=block_to_fork)
+        else:
+            boa.fork(url=rpc_url, block_identifier=block_to_fork, cache_file=None)
         boa.env.enable_fast_mode()
         yield
 
@@ -45,7 +47,7 @@ def vault_factory():
 
 
 @pytest.fixture(scope="module")
-def fee_splitter(scope="module"):
+def fee_splitter():
     _factory = boa.load_vyi("tests/integration/interfaces/IFeeSplitter.vyi")
     return _factory.at(ab.fee_splitter)
 
@@ -76,7 +78,7 @@ def vault(vault_factory):
     return _vault
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def rewards_handler(vault):
     rh = boa.load(
         "contracts/RewardsHandler.vy",
