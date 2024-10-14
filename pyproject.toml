@@ -10,27 +10,21 @@ requires-python = ">=3.10"
 dependencies = [
     "vyper>=0.4.0",
     "snekmate==0.1.0",
-    "titanoboa",
-    "plyvel-ci==1.5.1",
-    # Keep this as a placeholder in the dependencies array
+    "titanoboa", # Keep this as a placeholder in the dependencies array
 ]
 
 [tool.uv.sources]
 titanoboa = { git = "https://github.com/vyperlang/titanoboa.git", rev = "86df8936654db20686410488738d7abaf165a4c9" }
 
-[project.optional-dependencies]
-dev = [
+[tool.uv]
+dev-dependencies = [
+    "pytest-xdist>=3.6.1",
     "mamushi==0.0.4a3",
     "pre-commit==3.8.0",
     "ruff==0.6.9",
     "pytest==8.2.2",
     "pytest-xdist==3.6.1",
-]
-scripts = [
-    "tqdm==4.66.5",
-    "curve-dao==1.0.0",
-    "jupyter==1.0.0",
-    "python-dotenv==1.0.1",
+    "plyvel-ci==1.5.1",
 ]
 
 [tool.ruff]
