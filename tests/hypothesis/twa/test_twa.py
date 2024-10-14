@@ -6,10 +6,10 @@ from hypothesis.stateful import invariant, rule
 from tests.hypothesis.twa.stateful_base import TWAStatefulBase
 
 
-def test_state_machine():
-    # Explicitly run the state machine
-    TestTWAStateful = TWAStateful.TestCase()
-    TestTWAStateful.run()
+# def test_state_machine():
+#     # Explicitly run the state machine
+#     TestTWAStateful = TWAStateful.TestCase()
+#     TestTWAStateful.run()
 
 
 @settings(
@@ -130,4 +130,4 @@ class TWAStateful(TWAStatefulBase):
         ), f"Mismatch in TWA: contract={contract_twa}, python={python_twa}"
 
 
-# TestTWAStateful = TWAStateful.TestCase
+TestTWAStateful = TWAStateful.TestCase
