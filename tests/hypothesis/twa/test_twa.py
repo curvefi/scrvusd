@@ -21,7 +21,6 @@ def test_state_machine():
     verbosity=Verbosity.verbose,
 )
 class TWAStateful(TWAStatefulBase):
-
     @invariant()
     def check_initialization(self):
         assert self.twa_window > 0, "TWA window must be set"
