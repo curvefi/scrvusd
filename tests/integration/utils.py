@@ -1,18 +1,20 @@
 from itertools import combinations
 import address_book as ab
+import random
 
 
-def generate_token_combinations(other_tokens):
-    """Generate all unique combinations with my_token and 1–2 other tokens."""
+def generate_list_combinations(data_list, combo_sizes, randomize=False):
     combos = []
-    for count in range(1, 3):  # for 2 or 3 tokens in total
-        for combo in combinations(other_tokens.values(), count):
-            combos.append([*combo])
+    for count in combo_sizes:
+        for combo in combinations(data_list, count):
+            combos.append(list(combo))  # Convert each combination to a list
+    if randomize:
+        random.shuffle(combos)
     return combos
 
 
 # test functionality if run as a script
 if __name__ == "__main__":
-    combos = generate_token_combinations(ab.all_stables)
+    combos = generate_list_combinations(ab.all_stables, [1, 2])
     print(combos)
     print(len(combos))

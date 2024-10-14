@@ -97,40 +97,41 @@ def dev_address():
 
 
 @pytest.fixture(scope="module")
-def all_stablecoins():
-    return [ab.dai, ab.usdt, ab.usdc, ab.usde, ab.frax]
+def stableswap_factory():
+    return boa.from_etherscan(ab.factory_stableswap_ng, "factory_stableswap_ng")
 
 
 @pytest.fixture(scope="module")
-def all_yield_stables():
-    return [ab.sdai, ab.sfrax, ab.susde]
+def paired_tokens(request):
+    # This fixture is used to get upstream parametrization and populate the contracts
+    # Retrieve paired token combinations via request.param
+    tokens_list = request.param
+    # update the dict with contracts
+    for token in tokens_list:
+        token["contract"] = boa.from_etherscan(token["address"], token["name"])
+    return tokens_list
 
 
 @pytest.fixture(scope="module")
-def all_cryptos():
-    return [ab.weth, ab.steth, ab.wbtc, ab.tbtc]
-
-
-@pytest.fixture(scope="module")
-def stableswap_pool(request, vault, dev_address):
-    factory = boa.from_etherscan(ab.factory_stableswap_ng, "factory_stableswap_ng")
-
+def stableswap_pool(stableswap_factory, vault, dev_address, paired_tokens):
     # Retrieve token addresses and asset types from request.param
-    token_combo = request.param
-    coins = [vault.address] + [token["address"] for token in token_combo]
-    asset_types = [3] + [token.get("asset_type") for token in token_combo]
+    pool_tokens = [
+        {"asset_type": 3, "name": "scrvusd", "address": vault.address, "contract": vault},
+        *paired_tokens,
+    ]
+    coins = [token["address"] for token in pool_tokens]
+    asset_types = [token.get("asset_type") for token in pool_tokens]
 
-    pool_size = 2
-    A = 2000
-    fee = 1000000
-    ma_exp_time = 866
-    implementation_idx = 0
+    pool_size = len(coins)
+    # pool parameters
+    A, fee, ma_exp_time, implementation_idx = (2000, 1000000, 866, 0)
     method_ids = [b""] * pool_size
     oracles = ["0x0000000000000000000000000000000000000000"] * pool_size
     OFFPEG_FEE_MULTIPLIER = 20000000000
 
+    # deploy pool
     with boa.env.prank(dev_address):
-        pool = factory.deploy_plain_pool(
+        pool_address = stableswap_factory.deploy_plain_pool(
             "pool_name",
             "POOL",
             coins,
@@ -144,29 +145,35 @@ def stableswap_pool(request, vault, dev_address):
             oracles,
         )
     pool_interface = boa.load_vyi("tests/integration/interfaces/CurveStableSwapNG.vyi")
-
-    return pool_interface.at(pool)
-
-
-@pytest.fixture
-def add_liquidity(request, vault, dev_address):
-    """Fixture to add liquidity to a deployed pool."""
-
-    # Retrieve token addresses and asset types from request.param
-    token_combo = request.param
-    paired_tokens = [token["address"] for token in token_combo]
-    token_contracts = [vault] + [boa.from_etherscan(token, "token") for token in paired_tokens]
-    decimals = [token.decimals() for token in token_contracts]
-
-    # Fund `dev_address` with each token
-    for i, token in enumerate(token_contracts):
-        boa.deal(token, dev_address, 10_000_000 * 10 ** decimals[i])
-
-    # # Call add_liquidity from alice's account
-    # with boa.env.prank(alice):
-    #     stableswap_pool.add_liquidity([deposit_amount] * n_coins, 0)  # Use 0 for min_mint_amount
-
-    return stableswap_pool  # Return pool with added liquidity
+    pool = pool_interface.at(pool_address)
+    # fund dev with tokens (free-mint erc20s and deposit vaults)
+    AMOUNT_STABLE = 1_000_000
+    dev_balances = []
+    for token in pool_tokens:
+        if token["asset_type"] == 0:
+            boa.deal(
+                token["contract"], dev_address, AMOUNT_STABLE * 10 ** token["contract"].decimals()
+            )
+        elif token["asset_type"] == 3:
+            underlying_token = token["contract"].asset()
+            underlying_contract = boa.from_etherscan(underlying_token, "token")
+            decimals = underlying_contract.decimals()
+            boa.deal(
+                underlying_contract,
+                dev_address,
+                AMOUNT_STABLE * 10**decimals,
+            )
+            underlying_contract.approve(
+                token["contract"],
+                AMOUNT_STABLE * 10**decimals,
+                sender=dev_address,
+            )
+            token["contract"].deposit(AMOUNT_STABLE * 10**decimals, dev_address, sender=dev_address)
+        # Approve pool to spend vault tokens
+        token["contract"].approve(pool, 2**256 - 1, sender=dev_address)
+        dev_balances.append(token["contract"].balanceOf(dev_address))
+    pool.add_liquidity(dev_balances, 0, dev_address, sender=dev_address)
+    return pool
 
 
 @pytest.fixture(scope="module")

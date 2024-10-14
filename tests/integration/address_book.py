@@ -12,21 +12,20 @@ factory_stableswap_ng = "0x6A8cbed756804B16E05E741eDaBd5cB544AE21bf"
 factory_twocrypto_ng = "0x98EE851a00abeE0d95D08cF4CA2BdCE32aeaAF7F"
 factory_tricrypto_ng = "0x0c0e5f2fF0ff18a3be9b835635039256dC4B4963"
 
-stables = {
-    "dai": {"address": "0x6b175474e89094c44da98b954eedeac495271d0f", "asset_type": 0},
-    "usdt": {"address": "0xdac17f958d2ee523a2206206994597c13d831ec7", "asset_type": 0},
-    "usdc": {"address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48", "asset_type": 0},
-    "usde": {"address": "0x4c9edd5852cd905f086c759e8383e09bff1e68b3", "asset_type": 0},
-    "frax": {"address": "0x853d955acef822db058eb8505911ed77f175b99e", "asset_type": 0},
-}
+stables = [
+    {"name": "dai", "address": "0x6b175474e89094c44da98b954eedeac495271d0f", "asset_type": 0},
+    {"name": "usdt", "address": "0xdac17f958d2ee523a2206206994597c13d831ec7", "asset_type": 0},
+    {"name": "usdc", "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48", "asset_type": 0},
+    {"name": "usde", "address": "0x4c9edd5852cd905f086c759e8383e09bff1e68b3", "asset_type": 0},
+    {"name": "frax", "address": "0x853d955acef822db058eb8505911ed77f175b99e", "asset_type": 0},
+]
 
-yield_stables = {
-    "sdai": {"address": "0x83f20f44975d03b1b09e64809b757c47f942beea", "asset_type": 3},
-    "sfrax": {"address": "0xa663b02cf0a4b149d2ad41910cb81e23e1c41c32", "asset_type": 3},
-    "susde": {"address": "0x9d39a5de30e57443bff2a8307a4256c8797a3497", "asset_type": 3},
-}
-
-all_stables = {**stables, **yield_stables}
+yield_stables = [
+    {"name": "sdai", "address": "0x83f20f44975d03b1b09e64809b757c47f942beea", "asset_type": 3},
+    {"name": "sfrax", "address": "0xa663b02cf0a4b149d2ad41910cb81e23e1c41c32", "asset_type": 3},
+    {"name": "susde", "address": "0x9d39a5de30e57443bff2a8307a4256c8797a3497", "asset_type": 3},
+]
+all_stables = [*stables, *yield_stables]
 
 cryptos = {
     "weth": {"address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"},
