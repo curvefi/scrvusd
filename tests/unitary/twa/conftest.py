@@ -9,21 +9,21 @@ MIN_SNAPSHOT_DT = 60
 TWA_WINDOW = 1000
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture()
 def alice(crvusd):
     alice = boa.env.generate_address()
     boa.deal(crvusd, alice, INITIAL_BALANCE)
     return alice
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture()
 def setup_vault(vault, crvusd, vault_god, alice):
     crvusd.approve(vault.address, 2**256 - 1, sender=alice)
     vault.set_deposit_limit(crvusd.balanceOf(alice), sender=vault_god)
     return vault
 
 
-@pytest.fixture
+@pytest.fixture()
 def setup_rewards_handler(rewards_handler, curve_dao, twa_window, snapshot_interval):
     with boa.env.prank(curve_dao):
         rewards_handler.set_twa_window(twa_window)
@@ -31,21 +31,21 @@ def setup_rewards_handler(rewards_handler, curve_dao, twa_window, snapshot_inter
     return rewards_handler
 
 
-@pytest.fixture
+@pytest.fixture()
 def amt_deposit():
     return AMT_DEPOSIT
 
 
-@pytest.fixture
+@pytest.fixture()
 def snapshot_amount():
     return SNAPSHOT_AMOUNT
 
 
-@pytest.fixture
+@pytest.fixture()
 def snapshot_interval():
     return MIN_SNAPSHOT_DT
 
 
-@pytest.fixture
+@pytest.fixture()
 def twa_window():
     return TWA_WINDOW

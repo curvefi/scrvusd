@@ -2,12 +2,12 @@ import boa
 import pytest
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture()
 def mock_erc20():
     return boa.load("tests/mocks/MockERC20.vy")
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture()
 def recovery_manager(rewards_handler, curve_dao):
     _recovery_admin = boa.env.generate_address()
     rewards_handler.grantRole(rewards_handler.RECOVERY_MANAGER(), _recovery_admin, sender=curve_dao)

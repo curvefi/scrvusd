@@ -4,7 +4,7 @@ version         = "0.1.0"
 description     = ""
 authors         = [{ name = "Curve.fi", email = "info@curve.fi" }]
 readme          = "README.md"
-requires-python = ">=3.10"
+requires-python = "==3.12.6"
 
 # Requirements
 dependencies = [
@@ -14,7 +14,7 @@ dependencies = [
 ]
 
 [tool.uv.sources]
-titanoboa = { git = "https://github.com/vyperlang/titanoboa.git", rev = "86df8936654db20686410488738d7abaf165a4c9" }
+titanoboa = { git = "https://github.com/vyperlang/titanoboa.git", rev = "a52c79c67ba0e00ceafc70f9daf730c9a57f27c9" }
 
 [tool.uv]
 dev-dependencies = [

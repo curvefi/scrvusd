@@ -10,17 +10,17 @@ possible_scaling_factor = [i * 4000 for i in range(0, 5)]
 possible_req_weight = [i * 4000 for i in range(0, 3)]
 
 
-@pytest.fixture(params=possible_min_weight, scope="module")
+@pytest.fixture(params=possible_min_weight)
 def minimum_weight(request):
     return request.param
 
 
-@pytest.fixture(params=possible_scaling_factor, scope="module")
+@pytest.fixture(params=possible_scaling_factor)
 def scaling_factor(request):
     return request.param
 
 
-@pytest.fixture(params=possible_req_weight, scope="module")
+@pytest.fixture(params=possible_req_weight)
 def requested_weight(request):
     return request.param
 

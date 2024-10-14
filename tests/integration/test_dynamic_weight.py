@@ -5,7 +5,7 @@ import pytest
 import address_book as ab
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture()
 def new_depositor(crvusd, vault):
     def _new_depositor(amount):
         depositor = boa.env.generate_address()
@@ -19,7 +19,7 @@ def new_depositor(crvusd, vault):
     return _new_depositor
 
 
-@pytest.fixture(autouse=True, scope="module")
+@pytest.fixture(autouse=True)
 def inject_raw_weight(rewards_handler):
     raw_weight_source = textwrap.dedent("""
     @view
