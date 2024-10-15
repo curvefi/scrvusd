@@ -24,6 +24,11 @@ jobs:
     timeout-minutes: 30
     strategy:
       fail-fast: false
+      matrix:
+        folder:
+          - "tests/unitary"
+          - "tests/integration"
+          - "tests/hypothesis"
 
     steps:
       - uses: actions/checkout@v4
@@ -46,8 +51,8 @@ jobs:
         run: uv sync --extra=dev
 
       # Run tests with environment variables
-      - name: Run Tests
+      - name: Run Tests in ${{ matrix.folder }}
         env:
           ETH_RPC_URL: ${{ secrets.ETH_RPC_URL }}
           ETHERSCAN_API_KEY: ${{ secrets.ETHERSCAN_API_KEY }}
-        run: uv run pytest -n auto
+        run: uv run pytest -n auto ${{ matrix.folder }}
