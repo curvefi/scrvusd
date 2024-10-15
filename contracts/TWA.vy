@@ -54,11 +54,11 @@ MAX_SNAPSHOTS: constant(uint256) = 10**18  # 31.7 billion years if snapshot ever
 snapshots: public(DynArray[Snapshot, MAX_SNAPSHOTS])
 min_snapshot_dt_seconds: public(uint256)  # Minimum time between snapshots in seconds
 twa_window: public(uint256)  # Time window in seconds for TWA calculation
-last_snapshot_timestamp: public(uint256)  # Timestamp of the last snapshot (assigned in RewardsHandler)
+last_snapshot_timestamp: public(uint256)  # Timestamp of the last snapshot
 
 
 struct Snapshot:
-    tracked_value: uint256  # In 1e18 precision
+    tracked_value: uint256
     timestamp: uint256
 
 
@@ -83,7 +83,6 @@ def __init__(_twa_window: uint256, _min_snapshot_dt_seconds: uint256):
 def get_len_snapshots() -> uint256:
     """
     @notice Returns the number of snapshots stored.
-    @return Number of snapshots.
     """
     return len(self.snapshots)
 
@@ -115,6 +114,7 @@ def _take_snapshot(_value: uint256):
         )  # store the snapshot into the DynArray
         log SnapshotTaken(_value, block.timestamp)
 
+
 @internal
 def _set_twa_window(_new_window: uint256):
     """
@@ -136,12 +136,13 @@ def _set_snapshot_dt(_new_dt_seconds: uint256):
     self.min_snapshot_dt_seconds = _new_dt_seconds
     log SnapshotIntervalUpdated(_new_dt_seconds)
 
+
 @internal
 @view
 def _compute() -> uint256:
     """
     @notice Computes the TWA over the specified time window by iterating backwards over the snapshots.
-    @return The TWA for tracked value over the self.twa_window (10**18 decimals precision).
+    @return The TWA for tracked value over the self.twa_window.
     """
     num_snapshots: uint256 = len(self.snapshots)
     if num_snapshots == 0:

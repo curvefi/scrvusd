@@ -153,7 +153,8 @@ def available_deposit_limit(receiver: address) -> uint256:
     """
     @notice Checks the available deposit limit for a given receiver.
     @param receiver The address querying deposit limit.
-    @return uint256 Returns the maximum deposit limit if deposits are not paused, otherwise returns 0.
+    @return uint256 Returns the maximum deposit limit if deposits are not paused,
+    otherwise returns (self.max_deposit_limit - vault_balance).
     """
     if self.deposits_paused:
         return 0

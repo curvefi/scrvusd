@@ -69,7 +69,7 @@ def vault(vault_factory, crvusd, role_manager, dev_address):
 
     with boa.env.prank(dev_address):
         address = vault_factory.deploy_new_vault(
-            crvusd, "Staked crvUSD", "st-crvUSD", role_manager, 0
+            crvusd, "Savings crvUSD", "scrvUSD", role_manager, 0
         )
 
     return vault_deployer.at(address)
