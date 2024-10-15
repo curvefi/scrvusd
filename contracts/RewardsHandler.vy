@@ -14,8 +14,9 @@ balance over crvUSD circulating supply ratio. The contract handles the rewards
 in a permissionless manner, anyone can take snapshots of the TVL and distribute
 rewards. In case of manipulation of the time-weighted average, the contract
 allows trusted contracts given the role of `RATE_MANGER` to correct the
-distribution rate of the rewards. @license Copyright (c) Curve.Fi, 2020-2024 -
-all rights reserved
+distribution rate of the rewards.
+
+@license Copyright (c) Curve.Fi, 2020-2024 - all rights reserved
 
 @author curve.fi
 
@@ -155,7 +156,7 @@ def __init__(
 
     twa.__init__(
         WEEK,  # twa_window = 1 week
-        1,  #  min_snapshot_dt_seconds = 1 second (if 0, then spam is possible)
+        1,  #  min_snapshot_dt_seconds = 1 second
     )
 
     self._set_minimum_weight(minimum_weight)
@@ -168,6 +169,7 @@ def __init__(
 ################################################################
 #                   PERMISSIONLESS FUNCTIONS                   #
 ################################################################
+
 
 @external
 def take_snapshot():
