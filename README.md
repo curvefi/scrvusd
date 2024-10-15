@@ -1,4 +1,4 @@
-# st-crvUSD
+# scrvUSD
 
 Staking vault for crvUSD.
 

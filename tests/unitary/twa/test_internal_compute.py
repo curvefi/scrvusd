@@ -88,7 +88,7 @@ def test_default_behavior_twa_multiple_deposits(
     N_ITER = 5
     time_between_deposits = twa_window // N_ITER
 
-    staked_supply_rates = []
+    deposited_supply_rates = []
     timestamps = []
 
     for i in range(N_ITER):
@@ -96,7 +96,7 @@ def test_default_behavior_twa_multiple_deposits(
         rewards_handler.take_snapshot()
 
         rate, ts = rewards_handler.snapshots(i)
-        staked_supply_rates.append(rate)
+        deposited_supply_rates.append(rate)
         timestamps.append(ts)
 
         boa.env.time_travel(seconds=time_between_deposits)
@@ -105,11 +105,11 @@ def test_default_behavior_twa_multiple_deposits(
     if remaining_time > 0:
         boa.env.time_travel(seconds=remaining_time)
 
-    total_weighted_staked_supply_rate = 0
+    total_weighted_deposited_supply_rate = 0
     total_time = 0
-    for i in range(len(staked_supply_rates) - 1):
-        current_rate = staked_supply_rates[i]
-        next_rate = staked_supply_rates[i + 1]
+    for i in range(len(deposited_supply_rates) - 1):
+        current_rate = deposited_supply_rates[i]
+        next_rate = deposited_supply_rates[i + 1]
 
         current_timestamp = timestamps[i]
         next_timestamp = timestamps[i + 1]
@@ -118,24 +118,24 @@ def test_default_behavior_twa_multiple_deposits(
 
         trapezoidal_rate = (current_rate + next_rate) // 2
 
-        total_weighted_staked_supply_rate += trapezoidal_rate * time_delta
+        total_weighted_deposited_supply_rate += trapezoidal_rate * time_delta
         total_time += time_delta
 
-    if len(staked_supply_rates) > 0:
-        last_rate = staked_supply_rates[-1]
+    if len(deposited_supply_rates) > 0:
+        last_rate = deposited_supply_rates[-1]
         last_timestamp = timestamps[-1]
         time_delta = boa.env.evm.patch.timestamp - last_timestamp
 
-        total_weighted_staked_supply_rate += last_rate * time_delta
+        total_weighted_deposited_supply_rate += last_rate * time_delta
         total_time += time_delta
 
-    expected_twa = total_weighted_staked_supply_rate // total_time
+    expected_twa = total_weighted_deposited_supply_rate // total_time
 
     twa = rewards_handler.compute_twa()
 
-    total_staked_amount = amt_deposit * N_ITER
+    total_deposited_amount = amt_deposit * N_ITER
     circulating_supply = rewards_handler.eval("lens._circulating_supply()")
-    staked_rate = total_staked_amount * 10**4 // circulating_supply
+    deposited_rate = total_deposited_amount * 10**4 // circulating_supply
 
-    assert twa <= staked_rate, "TWA is unexpectedly higher than the staked rate"
+    assert twa <= deposited_rate, "TWA is unexpectedly higher than the staked rate"
     assert twa == expected_twa, f"TWA {twa} does not match expected {expected_twa}"
