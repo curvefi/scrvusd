@@ -1,19 +1,22 @@
 import boa
 
 
-def test_default_behavior(deposit_limit_module, dev_address, security_agent):
+def test_default_behavior(deposit_limit_module, security_agent, dev_multisig):
+    # Verify initialization
+    assert deposit_limit_module.is_security_agent(dev_multisig)
+
     # Verify that security_agent is not yet a security_agent
     assert not deposit_limit_module.is_security_agent(security_agent)
 
-    # Set security_agent status using dev_address privileges
-    with boa.env.prank(dev_address):
+    # Set security_agent status using dev_multisig privileges
+    with boa.env.prank(dev_multisig):
         deposit_limit_module.set_security_agent(security_agent, True)
 
     # Verify that security_agent is now a security_agent
     assert deposit_limit_module.is_security_agent(security_agent)
 
-    # Revoke security_agent role using dev_address privileges
-    with boa.env.prank(dev_address):
+    # Revoke security_agent role using dev_multisig privileges
+    with boa.env.prank(dev_multisig):
         deposit_limit_module.set_security_agent(security_agent, False)
 
     # Verify that security_agent is no longer a security_agent
