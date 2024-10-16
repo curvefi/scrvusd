@@ -1,9 +1,9 @@
 import boa
 
 
-def test_default_behavior(rewards_handler, rate_manager):
+def test_default_behavior(rewards_handler, lens_manager):
     new_lens = boa.env.generate_address()
-    rewards_handler.set_stablecoin_lens(new_lens, sender=rate_manager)
+    rewards_handler.set_stablecoin_lens(new_lens, sender=lens_manager)
     events = rewards_handler.get_logs()
 
     # Verify event emission

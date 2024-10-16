@@ -24,6 +24,15 @@ def rate_manager(request, rewards_handler):
     return _rate_manager
 
 
+@pytest.fixture(params=[CURVE_DAO, boa.env.generate_address("lens_manager")])
+def lens_manager(request, rewards_handler):
+    _lens_manager = request.param
+    if _lens_manager != CURVE_DAO:
+        rewards_handler.grantRole(rewards_handler.LENS_MANAGER(), _lens_manager, sender=CURVE_DAO)
+
+    return _lens_manager
+
+
 @pytest.fixture(params=[CURVE_DAO, boa.env.generate_address("recovery_manager")])
 def recovery_manager(request, rewards_handler):
     _recovery_manager = request.param
