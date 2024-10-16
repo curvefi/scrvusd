@@ -123,10 +123,6 @@ scaling_factor: public(uint256)
 # the minimum amount of rewards requested to the FeeSplitter.
 minimum_weight: public(uint256)
 
-# the time over which rewards will be distributed mirror of the private
-# `profit_max_unlock_time` variable from yearn vaults.
-distribution_time: public(uint256)
-
 
 ################################################################
 #                          CONSTRUCTOR                         #
@@ -210,7 +206,7 @@ def process_rewards():
     # prevent the rewards from being distributed untill the distribution rate
     # has been set
     assert (
-        self.distribution_time != 0
+        staticcall vault.profitMaxUnlockTime() != 0
     ), "rewards should be distributed over time"
 
     # any crvUSD sent to this contract (usually through the fee splitter, but
@@ -302,15 +298,21 @@ def set_distribution_time(new_distribution_time: uint256):
     """
     access_control._check_role(RATE_MANAGER, msg.sender)
 
-    # we mirror the value of new_profit_max_unlock_time from the yearn vault
-    # since it's not exposed publicly.
-    self.distribution_time = new_distribution_time
-
     # change the distribution time of the rewards in the vault
     extcall vault.setProfitMaxUnlockTime(new_distribution_time)
 
     # enact the changes
     extcall vault.process_report(vault.address)
+
+
+@view
+@external
+def distribution_time() -> uint256:
+    """
+    @notice Getter for the distribution time of the rewards.
+    @return uint256 The time over which vault rewards will be distributed.
+    """
+    return staticcall vault.profitMaxUnlockTime()
 
 
 @external

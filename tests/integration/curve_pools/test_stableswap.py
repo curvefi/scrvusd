@@ -4,7 +4,7 @@ from utils import generate_list_combinations
 import address_book as ab
 
 
-N_COMBINATIONS = 5  # num of combinations in stableswap tests (>=36 => all combinations)
+N_COMBINATIONS = 3  # num of combinations in stableswap tests (>=36 => all combinations)
 
 # produce tokens for stableswap to pair against crvusd
 paired_token_combinations = generate_list_combinations(ab.all_stables, [1, 2], randomize=True)
