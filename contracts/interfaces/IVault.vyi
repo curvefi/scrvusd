@@ -15,3 +15,9 @@ def process_report(strategy: address) -> (uint256, uint256):
 @external
 def totalAssets() -> uint256:
     ...
+
+
+@view
+@external
+def profitMaxUnlockTime() -> uint256:
+    ...
