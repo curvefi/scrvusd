@@ -1,10 +1,10 @@
 import os
-
 import address_book as ab
 import boa
 import pytest
 
 boa.set_etherscan(api_key=os.getenv("ETHERSCAN_API_KEY"))
+BOA_CACHE = False
 
 
 @pytest.fixture(autouse=True)
@@ -23,9 +23,10 @@ def rpc_url():
 def forked_env(rpc_url):
     block_to_fork = 20928372
     with boa.swap_env(boa.Env()):
-        boa.fork(url=rpc_url, block_identifier=block_to_fork)
-        # use this to disable caching
-        # boa.fork(url=rpc_url, block_identifier=block_to_fork, cache_file=None)
+        if BOA_CACHE:
+            boa.fork(url=rpc_url, block_identifier=block_to_fork)
+        else:
+            boa.fork(url=rpc_url, block_identifier=block_to_fork, cache_file=None)
         boa.env.enable_fast_mode()
         yield
 
