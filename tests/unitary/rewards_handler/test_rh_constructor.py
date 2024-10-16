@@ -13,11 +13,11 @@ def test_default_behavior(
     vault,
     minimum_weight,
     scaling_factor,
-    mock_controller_factory,
+    stablecoin_lens,
     curve_dao,
 ):
     rewards_handler = rewards_handler_deployer(
-        crvusd, vault, minimum_weight, scaling_factor, mock_controller_factory, curve_dao
+        crvusd, vault, stablecoin_lens, minimum_weight, scaling_factor, curve_dao
     )
 
     assert rewards_handler._immutables.stablecoin == crvusd.address
@@ -27,7 +27,7 @@ def test_default_behavior(
     assert rewards_handler._storage.minimum_weight.get() == minimum_weight
     assert rewards_handler.scaling_factor() == scaling_factor
     assert rewards_handler._storage.scaling_factor.get() == scaling_factor
-    assert rewards_handler.eval("lens.factory.address") == mock_controller_factory.address
+    assert rewards_handler.stablecoin_lens() == stablecoin_lens.address
     assert rewards_handler.hasRole(rewards_handler.DEFAULT_ADMIN_ROLE(), curve_dao)
     assert rewards_handler.hasRole(rewards_handler.RATE_MANAGER(), curve_dao)
     # eoa would be the deployer from which we revoke the role

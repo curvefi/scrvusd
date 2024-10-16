@@ -38,6 +38,8 @@ from contracts.interfaces import IDynamicWeight
 
 implements: IDynamicWeight
 
+from contracts.interfaces import IStablecoinLens
+
 # yearn vault's interface
 from interfaces import IVault
 
@@ -64,9 +66,6 @@ exports: (
 )
 
 # import custom modules that contain helper functions.
-import StablecoinLens as lens
-initializes: lens
-
 import TWA as twa
 initializes: twa
 exports: (
@@ -90,6 +89,10 @@ event MinimumWeightUpdated:
 
 event ScalingFactorUpdated:
     new_scaling_factor: uint256
+
+
+event StablecoinLensUpdated:
+    new_lens: IStablecoinLens
 
 
 ################################################################
@@ -123,6 +126,9 @@ scaling_factor: public(uint256)
 # the minimum amount of rewards requested to the FeeSplitter.
 minimum_weight: public(uint256)
 
+# stablecoin circulating supply contract
+stablecoin_lens: public(IStablecoinLens)
+
 
 ################################################################
 #                          CONSTRUCTOR                         #
@@ -133,13 +139,11 @@ minimum_weight: public(uint256)
 def __init__(
     _stablecoin: IERC20,
     _vault: IVault,
+    _lens: IStablecoinLens,
     minimum_weight: uint256,
     scaling_factor: uint256,
-    controller_factory: lens.IControllerFactory,
     admin: address,
 ):
-    lens.__init__(controller_factory)
-
     # initialize access control
     access_control.__init__()
     # admin (most likely the dao) controls who can be a rate manager
@@ -158,6 +162,7 @@ def __init__(
     self._set_minimum_weight(minimum_weight)
     self._set_scaling_factor(scaling_factor)
 
+    self._set_stablecoin_lens(_lens)
     stablecoin = _stablecoin
     vault = _vault
 
@@ -180,9 +185,9 @@ def take_snapshot():
     deflates the value of the snapshot).
     """
 
-    # get the circulating supply from a helper function.
+    # get the circulating supply from a helper contract.
     # supply in circulation = controllers' debt + peg keppers' debt
-    circulating_supply: uint256 = lens._circulating_supply()
+    circulating_supply: uint256 = staticcall self.stablecoin_lens.circulating_supply()
 
     # obtain the supply of crvUSD contained in the vault by simply checking its
     # balance since it's an ERC4626 vault. This will also take into account
@@ -353,6 +358,22 @@ def _set_scaling_factor(new_scaling_factor: uint256):
 
     log ScalingFactorUpdated(new_scaling_factor)
 
+
+@external
+def set_stablecoin_lens(_lens: address):
+    """
+    @notice Setter for the stablecoin lens that determines stablecoin circulating supply.
+    @param _lens The address of the new stablecoin lens.
+    """
+    access_control._check_role(RATE_MANAGER, msg.sender)
+    self._set_stablecoin_lens(IStablecoinLens(_lens))
+
+
+@internal
+def _set_stablecoin_lens(_lens: IStablecoinLens):
+    self.stablecoin_lens = _lens
+
+    log StablecoinLensUpdated(_lens)
 
 @external
 def recover_erc20(token: IERC20, receiver: address):
