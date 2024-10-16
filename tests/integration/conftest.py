@@ -113,10 +113,6 @@ def rewards_handler(vault, minimum_weight):
     )
     vault.set_role(rh, 2**11 | 2**5 | 2**0, sender=ab.dao_agent)
 
-    # TODO how to enforce this in prod?
-    time = vault.profitMaxUnlockTime()
-    rh.eval(f"self.distribution_time = {time}")
-
     return rh
 
 
