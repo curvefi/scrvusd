@@ -31,12 +31,12 @@ def inject_raw_weight(rewards_handler):
 
 
 def test_fee_splitter_cap(
-    fee_splitter, crvusd, vault, rewards_handler, active_controllers, new_depositor
+    fee_splitter, crvusd, vault, rewards_handler, active_controllers, new_depositor, stablecoin_lens
 ):
     # test were we ask for so much that we hit the cap
     fee_splitter_cap = fee_splitter.receivers(0)[1]
 
-    circulating_supply = rewards_handler.eval("lens._circulating_supply()")
+    circulating_supply = stablecoin_lens.circulating_supply()
 
     # with the supply at the time of the fork
     # if we deposit 10_000_000 crvUSD in the vault

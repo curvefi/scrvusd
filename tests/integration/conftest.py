@@ -37,11 +37,6 @@ def controller_factory():
 
 
 @pytest.fixture()
-def lens(controller_factory):
-    return boa.load("contracts/StablecoinLens.vy", controller_factory)
-
-
-@pytest.fixture()
 def vault_factory():
     return boa.from_etherscan(ab.yearn_vault_factory, "vault_factory")
 
@@ -101,19 +96,24 @@ def minimum_weight():
 
 
 @pytest.fixture()
-def rewards_handler(vault, minimum_weight):
+def rewards_handler(vault, minimum_weight, stablecoin_lens):
     rh = boa.load(
         "contracts/RewardsHandler.vy",
         ab.crvusd,
         vault,
+        stablecoin_lens,
         minimum_weight,  # 5%
         10_000,  # 1
-        ab.crvusd_controller_factory,
         ab.dao_agent,
     )
     vault.set_role(rh, 2**11 | 2**5, sender=ab.dao_agent)
 
     return rh
+
+
+@pytest.fixture()
+def stablecoin_lens():
+    return boa.load("contracts/StablecoinLens.vy", ab.crvusd_controller_factory)
 
 
 @pytest.fixture()

@@ -92,7 +92,7 @@ event ScalingFactorUpdated:
 
 
 event StablecoinLensUpdated:
-    new_lens: IStablecoinLens
+    new_stablecoin_lens: IStablecoinLens
 
 
 ################################################################
