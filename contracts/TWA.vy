@@ -11,7 +11,7 @@ a specified time window.
   time interval (`min_snapshot_dt_seconds`) has passed.
 - Uses the trapezoidal rule to calculate the TWA over the `twa_window`.
 - Functions:
-  - `_store_snapshot`: Internal, adds a snapshot if the minimum interval passed.
+  - `_take_snapshot`: Internal, adds a snapshot if the minimum interval passed.
     Wrapper required in importing contract.
   - `compute_twa`: Calculates and returns the TWA based on stored snapshots.
   - `get_len_snapshots`: Returns the number of stored snapshots.
