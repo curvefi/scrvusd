@@ -102,6 +102,7 @@ event StablecoinLensUpdated:
 
 RATE_MANAGER: public(constant(bytes32)) = keccak256("RATE_MANAGER")
 RECOVERY_MANAGER: public(constant(bytes32)) = keccak256("RECOVERY_MANAGER")
+LENS_MANAGER: public(constant(bytes32)) = keccak256("LENS_MANAGER")
 WEEK: constant(uint256) = 86_400 * 7  # 7 days
 MAX_BPS: constant(uint256) = 10**4  # 100%
 
@@ -151,6 +152,8 @@ def __init__(
     # admin itself is a RATE_MANAGER and RECOVERY_MANAGER
     access_control._grant_role(RATE_MANAGER, admin)
     access_control._grant_role(RECOVERY_MANAGER, admin)
+    access_control._grant_role(LENS_MANAGER, admin)
+
     # deployer does not control this contract
     access_control._revoke_role(access_control.DEFAULT_ADMIN_ROLE, msg.sender)
 
@@ -365,12 +368,13 @@ def set_stablecoin_lens(_lens: address):
     @notice Setter for the stablecoin lens that determines stablecoin circulating supply.
     @param _lens The address of the new stablecoin lens.
     """
-    access_control._check_role(RATE_MANAGER, msg.sender)
+    access_control._check_role(LENS_MANAGER, msg.sender)
     self._set_stablecoin_lens(IStablecoinLens(_lens))
 
 
 @internal
 def _set_stablecoin_lens(_lens: IStablecoinLens):
+    assert _lens != empty(IStablecoinLens), "no lens"
     self.stablecoin_lens = _lens
 
     log StablecoinLensUpdated(_lens)
