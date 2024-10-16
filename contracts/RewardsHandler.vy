@@ -53,6 +53,7 @@ from interfaces import IVault
 # to adjust the rate while only the dao (which has the `DEFAULT_ADMIN_ROLE`)
 # can appoint `RATE_MANAGER`s
 from snekmate.auth import access_control
+
 initializes: access_control
 exports: (
     # we don't expose `supportsInterface` from access control
@@ -213,9 +214,7 @@ def process_rewards():
 
     # prevent the rewards from being distributed untill the distribution rate
     # has been set
-    assert (
-        staticcall vault.profitMaxUnlockTime() != 0
-    ), "rewards should be distributed over time"
+    assert (staticcall vault.profitMaxUnlockTime() != 0), "rewards should be distributed over time"
 
     # any crvUSD sent to this contract (usually through the fee splitter, but
     # could also come from other sources) will be used as a reward for scrvUSD
@@ -374,10 +373,11 @@ def set_stablecoin_lens(_lens: address):
 
 @internal
 def _set_stablecoin_lens(_lens: IStablecoinLens):
-    assert _lens != empty(IStablecoinLens), "no lens"
+    assert _lens.address != empty(address), "no lens"
     self.stablecoin_lens = _lens
 
     log StablecoinLensUpdated(_lens)
+
 
 @external
 def recover_erc20(token: IERC20, receiver: address):
@@ -395,6 +395,4 @@ def recover_erc20(token: IERC20, receiver: address):
     # when funds are recovered the whole balanced is sent to a trusted address.
     balance_to_recover: uint256 = staticcall token.balanceOf(self)
 
-    assert extcall token.transfer(
-        receiver, balance_to_recover, default_return_value=True
-    )
+    assert extcall token.transfer(receiver, balance_to_recover, default_return_value=True)
