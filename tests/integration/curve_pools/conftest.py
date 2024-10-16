@@ -9,7 +9,7 @@ def alice():
 
 
 @pytest.fixture()
-def dev_address():
+def dev_deployer():
     return boa.env.generate_address()
 
 
@@ -51,7 +51,7 @@ def pool_tokens(paired_tokens, vault):
 
 
 @pytest.fixture()
-def stableswap_pool(stableswap_factory, vault, dev_address, pool_tokens):
+def stableswap_pool(stableswap_factory, vault, dev_deployer, pool_tokens):
     # Retrieve token addresses and asset types from request.param
     coins = [token["address"] for token in pool_tokens]
     asset_types = [token.get("asset_type") for token in pool_tokens]
@@ -63,7 +63,7 @@ def stableswap_pool(stableswap_factory, vault, dev_address, pool_tokens):
     oracles = ["0x0000000000000000000000000000000000000000"] * pool_size
     offpeg_fee_mp = 20000000000
     # deploy pool
-    with boa.env.prank(dev_address):
+    with boa.env.prank(dev_deployer):
         pool_address = stableswap_factory.deploy_plain_pool(
             "pool_name",
             "POOL",
@@ -84,27 +84,29 @@ def stableswap_pool(stableswap_factory, vault, dev_address, pool_tokens):
     dev_balances = []
     for token in pool_tokens:
         if token["asset_type"] == 0:
-            boa.deal(token["contract"], dev_address, AMOUNT_STABLE * 10 ** token["decimals"])
+            boa.deal(token["contract"], dev_deployer, AMOUNT_STABLE * 10 ** token["decimals"])
         elif token["asset_type"] == 3:
             underlying_token = token["contract"].asset()
             underlying_contract = boa.from_etherscan(underlying_token, "token")
             decimals = underlying_contract.decimals()
             boa.deal(
                 underlying_contract,
-                dev_address,
+                dev_deployer,
                 AMOUNT_STABLE * 10**decimals
                 + underlying_contract.balanceOf(
-                    dev_address
+                    dev_deployer
                 ),  # in case of dai + sdai deal would overwrite, so we add the previous balance
             )
             underlying_contract.approve(
                 token["contract"],
                 AMOUNT_STABLE * 10**decimals,
-                sender=dev_address,
+                sender=dev_deployer,
             )
-            token["contract"].deposit(AMOUNT_STABLE * 10**decimals, dev_address, sender=dev_address)
+            token["contract"].deposit(
+                AMOUNT_STABLE * 10**decimals, dev_deployer, sender=dev_deployer
+            )
         # Approve pool to spend vault tokens
-        token["contract"].approve(pool, 2**256 - 1, sender=dev_address)
-        dev_balances.append(token["contract"].balanceOf(dev_address))
-    pool.add_liquidity(dev_balances, 0, dev_address, sender=dev_address)
+        token["contract"].approve(pool, 2**256 - 1, sender=dev_deployer)
+        dev_balances.append(token["contract"].balanceOf(dev_deployer))
+    pool.add_liquidity(dev_balances, 0, dev_deployer, sender=dev_deployer)
     return pool

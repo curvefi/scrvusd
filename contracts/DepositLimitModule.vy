@@ -39,12 +39,13 @@ vault: public(immutable(IVault))
 def __init__(
     _vault: IVault,
     max_deposit_limit: uint256,
+    admin: address,
 ):
     """
     @notice Initializes the contract by assigning the deployer as the initial admin and security_agent.
     """
-    self._set_admin(msg.sender, True)
-    self._set_security_agent(msg.sender, True)
+    self._set_admin(admin, True)
+    self._set_security_agent(admin, True)
     self._set_deposits_paused(False)  # explicit non-paused at init
     self._set_deposit_limit(max_deposit_limit)
 
@@ -153,7 +154,8 @@ def available_deposit_limit(receiver: address) -> uint256:
     """
     @notice Checks the available deposit limit for a given receiver.
     @param receiver The address querying deposit limit.
-    @return uint256 Returns the maximum deposit limit if deposits are not paused, otherwise returns 0.
+    @return uint256 Returns the maximum deposit limit if deposits are not paused,
+    otherwise returns (self.max_deposit_limit - vault_balance).
     """
     if self.deposits_paused:
         return 0

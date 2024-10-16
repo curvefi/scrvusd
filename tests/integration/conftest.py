@@ -4,7 +4,7 @@ import boa
 import pytest
 
 boa.set_etherscan(api_key=os.getenv("ETHERSCAN_API_KEY"))
-BOA_CACHE = False
+BOA_CACHE = True
 
 
 @pytest.fixture(autouse=True)
@@ -111,7 +111,7 @@ def rewards_handler(vault, minimum_weight):
         ab.crvusd_controller_factory,
         ab.dao_agent,
     )
-    vault.set_role(rh, 2**11 | 2**5 | 2**0, sender=ab.dao_agent)
+    vault.set_role(rh, 2**11 | 2**5, sender=ab.dao_agent)
 
     # this will always be the same in prod since the
     # only actor authorized to call this is the rewards

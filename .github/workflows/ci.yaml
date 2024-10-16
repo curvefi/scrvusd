@@ -55,4 +55,4 @@ jobs:
         env:
           ETH_RPC_URL: ${{ secrets.ETH_RPC_URL }}
           ETHERSCAN_API_KEY: ${{ secrets.ETHERSCAN_API_KEY }}
-        run: uv run pytest -n auto ${{ matrix.folder }}
+        run: uv run pytest ${{ matrix.folder }}

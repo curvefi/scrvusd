@@ -36,7 +36,12 @@ def recovery_manager(request, rewards_handler):
 
 
 @pytest.fixture()
-def dev_address():
+def dev_deployer():
+    return boa.env.generate_address()
+
+
+@pytest.fixture()
+def dev_multisig():
     return boa.env.generate_address()
 
 
@@ -51,10 +56,10 @@ def vault_init_deposit_cap():
 
 
 @pytest.fixture()
-def deposit_limit_module(dev_address, crvusd, vault, vault_init_deposit_cap):
+def deposit_limit_module(dev_deployer, crvusd, vault, vault_init_deposit_cap, dev_multisig):
     contract_deployer = boa.load_partial("contracts/DepositLimitModule.vy")
-    with boa.env.prank(dev_address):
-        contract = contract_deployer(vault, vault_init_deposit_cap)
+    with boa.env.prank(dev_deployer):
+        contract = contract_deployer(vault, vault_init_deposit_cap, dev_multisig)
     return contract
 
 
@@ -84,12 +89,12 @@ def role_manager():
 
 
 @pytest.fixture()
-def vault(vault_factory, crvusd, role_manager, dev_address):
+def vault(vault_factory, crvusd, role_manager, dev_deployer):
     vault_deployer = boa.load_partial("contracts/yearn/VaultV3.vy")
 
-    with boa.env.prank(dev_address):
+    with boa.env.prank(dev_deployer):
         address = vault_factory.deploy_new_vault(
-            crvusd, "Staked crvUSD", "st-crvUSD", role_manager, 0
+            crvusd, "Savings crvUSD", "scrvUSD", role_manager, 0
         )
 
     return vault_deployer.at(address)
@@ -153,14 +158,14 @@ def rewards_handler(
     scaling_factor,
     mock_controller_factory,
     curve_dao,
-    dev_address,
+    dev_deployer,
 ):
     rewards_handler_deployer = boa.load_partial("contracts/RewardsHandler.vy")
-    with boa.env.prank(dev_address):
+    with boa.env.prank(dev_deployer):
         rh = rewards_handler_deployer(
             crvusd, vault, minimum_weight, scaling_factor, mock_controller_factory, curve_dao
         )
 
-    vault.set_role(rh, 2**11 | 2**5 | 2**0, sender=role_manager)
+    vault.set_role(rh, 2**11 | 2**5, sender=role_manager)
 
     return rh
