@@ -39,12 +39,13 @@ vault: public(immutable(IVault))
 def __init__(
     _vault: IVault,
     max_deposit_limit: uint256,
+    admin: address,
 ):
     """
     @notice Initializes the contract by assigning the deployer as the initial admin and security_agent.
     """
-    self._set_admin(msg.sender, True)
-    self._set_security_agent(msg.sender, True)
+    self._set_admin(admin, True)
+    self._set_security_agent(admin, True)
     self._set_deposits_paused(False)  # explicit non-paused at init
     self._set_deposit_limit(max_deposit_limit)
 

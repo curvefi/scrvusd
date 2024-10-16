@@ -3,17 +3,17 @@ import boa
 
 def test_default_behavior(
     deposit_limit_module,
-    dev_address,
+    dev_multisig,
 ):
-    # Pause deposits using the security_agent privileges of dev_address
-    with boa.env.prank(dev_address):
+    # Pause deposits using the security_agent privileges of dev_multisig
+    with boa.env.prank(dev_multisig):
         deposit_limit_module.set_deposits_paused(True)
 
     # Verify that deposits are paused
     assert deposit_limit_module.deposits_paused()
 
     # Resume deposits
-    with boa.env.prank(dev_address):
+    with boa.env.prank(dev_multisig):
         deposit_limit_module.set_deposits_paused(False)
 
     # Verify that deposits are no longer paused
@@ -22,14 +22,14 @@ def test_default_behavior(
 
 def test_set_deposits_paused_unauthorized(
     deposit_limit_module,
-    security_agent,
+    dev_deployer,
 ):
     # Verify deposits are initially unpaused
     assert not deposit_limit_module.deposits_paused()
 
     # Attempt to pause deposits using an unauthorized address
     with (
-        boa.env.prank(security_agent),
+        boa.env.prank(dev_deployer),
         boa.reverts("Caller is not a security_agent"),
     ):
         deposit_limit_module.set_deposits_paused(True)

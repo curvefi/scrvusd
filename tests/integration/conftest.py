@@ -111,7 +111,7 @@ def rewards_handler(vault, minimum_weight):
         ab.crvusd_controller_factory,
         ab.dao_agent,
     )
-    vault.set_role(rh, 2**11 | 2**5 | 2**0, sender=ab.dao_agent)
+    vault.set_role(rh, 2**11 | 2**5, sender=ab.dao_agent)
 
     return rh
 

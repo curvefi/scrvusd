@@ -11,7 +11,7 @@ paired_token_combinations = generate_list_combinations(ab.all_stables, [1, 2], r
 tokens_subset = paired_token_combinations[0:N_COMBINATIONS]
 
 
-def test_accrue_value(alice, dev_address, vault, crvusd, crvusd_init_balance):
+def test_accrue_value(alice, dev_deployer, vault, crvusd, crvusd_init_balance):
     # fund alice
     assert crvusd.balanceOf(alice) == 0
     boa.deal(crvusd, alice, crvusd_init_balance)
@@ -23,8 +23,8 @@ def test_accrue_value(alice, dev_address, vault, crvusd, crvusd_init_balance):
     alice_value_0 = vault.convertToAssets(vault.balanceOf(alice))
 
     # deposit crvusd rewards into vault & time travel
-    boa.deal(crvusd, dev_address, crvusd_init_balance)
-    crvusd.transfer(vault, crvusd_init_balance, sender=dev_address)
+    boa.deal(crvusd, dev_deployer, crvusd_init_balance)
+    crvusd.transfer(vault, crvusd_init_balance, sender=dev_deployer)
     vault.process_report(vault, sender=ab.dao_agent)
     boa.env.time_travel(seconds=86_400 * 7)
 
@@ -45,7 +45,7 @@ def test_stableswap_pool_liquidity(
     paired_tokens,
     vault,
     alice,
-    dev_address,
+    dev_deployer,
     crvusd_init_balance,
     crvusd,
 ):
@@ -69,8 +69,8 @@ def test_stableswap_pool_liquidity(
 
     # now increase shares value by 5%
     amt_reward = int(vault.totalAssets() * 0.05)
-    boa.deal(crvusd, dev_address, amt_reward)
-    crvusd.transfer(vault, amt_reward, sender=dev_address)
+    boa.deal(crvusd, dev_deployer, amt_reward)
+    crvusd.transfer(vault, amt_reward, sender=dev_deployer)
     vault.process_report(vault, sender=ab.dao_agent)
     boa.env.time_travel(seconds=86_400 * 7)
 
@@ -94,7 +94,7 @@ def test_stableswap_pool_liquidity(
     ids=[f"scrvusd+{'+'.join([token['name'] for token in tokens])}" for tokens in tokens_subset],
 )
 def test_stableswap_pool_prices_with_vault_growth(
-    stableswap_pool, pool_tokens, vault, dev_address, crvusd, paired_tokens
+    stableswap_pool, pool_tokens, vault, dev_deployer, crvusd, paired_tokens
 ):
     """
     Test where vault shares grow (rewards airdropped), and we expect that pool prices change accordingly.
@@ -117,11 +117,11 @@ def test_stableswap_pool_prices_with_vault_growth(
 
         # Step 2: Dev removes 5% of liquidity in a balanced way
         stableswap_pool.remove_liquidity(
-            stableswap_pool.balanceOf(dev_address) // 20,
+            stableswap_pool.balanceOf(dev_deployer) // 20,
             [0] * n_coins,
-            dev_address,
+            dev_deployer,
             True,
-            sender=dev_address,
+            sender=dev_deployer,
         )
         # Check pool prices after each iteration
         cur_dy = [stableswap_pool.get_dy(0, i, 10 ** decimals[0]) for i in range(1, n_coins)]
