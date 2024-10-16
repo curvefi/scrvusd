@@ -1,11 +1,11 @@
 import boa
 
 
-def test_default_behavior(rewards_handler, curve_dao):
+def test_default_behavior(rewards_handler, rate_manager):
     initial_twa_window = rewards_handler.twa_window()
     new_twa_window = initial_twa_window + 1000  # Increment by 1000 seconds
 
-    with boa.env.prank(curve_dao):
+    with boa.env.prank(rate_manager):
         rewards_handler.set_twa_window(new_twa_window)
 
     # Verify that twa_window has been updated

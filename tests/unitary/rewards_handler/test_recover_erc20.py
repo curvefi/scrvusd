@@ -7,13 +7,6 @@ def mock_erc20():
     return boa.load("tests/mocks/MockERC20.vy")
 
 
-@pytest.fixture()
-def recovery_manager(rewards_handler, curve_dao):
-    _recovery_admin = boa.env.generate_address()
-    rewards_handler.grantRole(rewards_handler.RECOVERY_MANAGER(), _recovery_admin, sender=curve_dao)
-    return _recovery_admin
-
-
 def test_default_behavior(rewards_handler, mock_erc20, recovery_manager):
     rescue_address = boa.env.generate_address()
     boa.deal(mock_erc20, rewards_handler, 10**18)

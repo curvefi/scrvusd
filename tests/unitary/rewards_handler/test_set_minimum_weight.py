@@ -1,8 +1,8 @@
 import boa
 
 
-def test_default_behavior(rewards_handler, curve_dao):
-    rewards_handler.set_minimum_weight(2000, sender=curve_dao)
+def test_default_behavior(rewards_handler, rate_manager):
+    rewards_handler.set_minimum_weight(2000, sender=rate_manager)
     events = rewards_handler.get_logs()
 
     # Verify event emission

@@ -2,6 +2,7 @@ import boa
 import pytest
 
 MOCK_CRV_USD_CIRCULATING_SUPPLY = 69_420_000 * 10**18
+CURVE_DAO = boa.env.generate_address()
 
 
 @pytest.fixture()
@@ -11,8 +12,27 @@ def yearn_gov():
 
 @pytest.fixture()
 def curve_dao():
-    # TODO add a fixture for rate managers that contains curve dao
-    return boa.env.generate_address()
+    return CURVE_DAO
+
+
+@pytest.fixture(params=[CURVE_DAO, boa.env.generate_address("rate_manager")])
+def rate_manager(request, rewards_handler):
+    _rate_manager = request.param
+    if _rate_manager != CURVE_DAO:
+        rewards_handler.grantRole(rewards_handler.RATE_MANAGER(), _rate_manager, sender=CURVE_DAO)
+
+    return _rate_manager
+
+
+@pytest.fixture(params=[CURVE_DAO, boa.env.generate_address("recovery_manager")])
+def recovery_manager(request, rewards_handler):
+    _recovery_manager = request.param
+    if _recovery_manager != CURVE_DAO:
+        rewards_handler.grantRole(
+            rewards_handler.RECOVERY_MANAGER(), _recovery_manager, sender=CURVE_DAO
+        )
+
+    return _recovery_manager
 
 
 @pytest.fixture()
