@@ -313,6 +313,16 @@ def set_distribution_time(new_distribution_time: uint256):
     extcall vault.process_report(vault.address)
 
 
+@view
+@external
+def distribution_time() -> uint256:
+    """
+    @notice Getter for the distribution time of the rewards.
+    @return uint256 The time over which vault rewards will be distributed.
+    """
+    return staticcall vault.profitMaxUnlockTime()
+
+
 @external
 def set_minimum_weight(new_minimum_weight: uint256):
     """
