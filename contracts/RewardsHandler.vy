@@ -201,10 +201,9 @@ def _take_snapshot():
     # supply in circulation = controllers' debt + peg keppers' debt
     circulating_supply: uint256 = staticcall self.stablecoin_lens.circulating_supply()
 
-    # obtain the supply of crvUSD contained in the vault by simply checking its
-    # balance since it's an ERC4626 vault. This will also take into account
-    # rewards that are not yet distributed.
-    supply_in_vault: uint256 = staticcall stablecoin.balanceOf(vault.address)
+    # obtain the supply of crvUSD contained in the vault by checking its
+    # totalAssets. This will also not take into account rewards that are not yet distributed.
+    supply_in_vault: uint256 = staticcall vault.totalAssets()
 
     # here we intentionally reduce the precision of the ratio because the
     # dynamic weight interface expects a percentage in BPS.
