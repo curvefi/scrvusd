@@ -38,6 +38,8 @@ from contracts.interfaces import IDynamicWeight
 
 implements: IDynamicWeight
 
+from contracts.interfaces import IStablecoinLens
+
 # yearn vault's interface
 from interfaces import IVault
 
@@ -51,6 +53,7 @@ from interfaces import IVault
 # to adjust the rate while only the dao (which has the `DEFAULT_ADMIN_ROLE`)
 # can appoint `RATE_MANAGER`s
 from snekmate.auth import access_control
+
 initializes: access_control
 exports: (
     # we don't expose `supportsInterface` from access control
@@ -64,9 +67,6 @@ exports: (
 )
 
 # import custom modules that contain helper functions.
-import StablecoinLens as lens
-initializes: lens
-
 import TWA as twa
 initializes: twa
 exports: (
@@ -92,6 +92,10 @@ event ScalingFactorUpdated:
     new_scaling_factor: uint256
 
 
+event StablecoinLensUpdated:
+    new_stablecoin_lens: IStablecoinLens
+
+
 ################################################################
 #                           CONSTANTS                          #
 ################################################################
@@ -99,6 +103,7 @@ event ScalingFactorUpdated:
 
 RATE_MANAGER: public(constant(bytes32)) = keccak256("RATE_MANAGER")
 RECOVERY_MANAGER: public(constant(bytes32)) = keccak256("RECOVERY_MANAGER")
+LENS_MANAGER: public(constant(bytes32)) = keccak256("LENS_MANAGER")
 WEEK: constant(uint256) = 86_400 * 7  # 7 days
 MAX_BPS: constant(uint256) = 10**4  # 100%
 
@@ -123,6 +128,9 @@ scaling_factor: public(uint256)
 # the minimum amount of rewards requested to the FeeSplitter.
 minimum_weight: public(uint256)
 
+# stablecoin circulating supply contract
+stablecoin_lens: public(IStablecoinLens)
+
 
 ################################################################
 #                          CONSTRUCTOR                         #
@@ -133,13 +141,11 @@ minimum_weight: public(uint256)
 def __init__(
     _stablecoin: IERC20,
     _vault: IVault,
+    _lens: IStablecoinLens,
     minimum_weight: uint256,
     scaling_factor: uint256,
-    controller_factory: lens.IControllerFactory,
     admin: address,
 ):
-    lens.__init__(controller_factory)
-
     # initialize access control
     access_control.__init__()
     # admin (most likely the dao) controls who can be a rate manager
@@ -147,6 +153,8 @@ def __init__(
     # admin itself is a RATE_MANAGER and RECOVERY_MANAGER
     access_control._grant_role(RATE_MANAGER, admin)
     access_control._grant_role(RECOVERY_MANAGER, admin)
+    access_control._grant_role(LENS_MANAGER, admin)
+
     # deployer does not control this contract
     access_control._revoke_role(access_control.DEFAULT_ADMIN_ROLE, msg.sender)
 
@@ -158,6 +166,7 @@ def __init__(
     self._set_minimum_weight(minimum_weight)
     self._set_scaling_factor(scaling_factor)
 
+    self._set_stablecoin_lens(_lens)
     stablecoin = _stablecoin
     vault = _vault
 
@@ -180,9 +189,9 @@ def take_snapshot():
     deflates the value of the snapshot).
     """
 
-    # get the circulating supply from a helper function.
+    # get the circulating supply from a helper contract.
     # supply in circulation = controllers' debt + peg keppers' debt
-    circulating_supply: uint256 = lens._circulating_supply()
+    circulating_supply: uint256 = staticcall self.stablecoin_lens.circulating_supply()
 
     # obtain the supply of crvUSD contained in the vault by simply checking its
     # balance since it's an ERC4626 vault. This will also take into account
@@ -205,9 +214,7 @@ def process_rewards():
 
     # prevent the rewards from being distributed untill the distribution rate
     # has been set
-    assert (
-        staticcall vault.profitMaxUnlockTime() != 0
-    ), "rewards should be distributed over time"
+    assert (staticcall vault.profitMaxUnlockTime() != 0), "rewards should be distributed over time"
 
     # any crvUSD sent to this contract (usually through the fee splitter, but
     # could also come from other sources) will be used as a reward for scrvUSD
@@ -355,6 +362,24 @@ def _set_scaling_factor(new_scaling_factor: uint256):
 
 
 @external
+def set_stablecoin_lens(_lens: address):
+    """
+    @notice Setter for the stablecoin lens that determines stablecoin circulating supply.
+    @param _lens The address of the new stablecoin lens.
+    """
+    access_control._check_role(LENS_MANAGER, msg.sender)
+    self._set_stablecoin_lens(IStablecoinLens(_lens))
+
+
+@internal
+def _set_stablecoin_lens(_lens: IStablecoinLens):
+    assert _lens.address != empty(address), "no lens"
+    self.stablecoin_lens = _lens
+
+    log StablecoinLensUpdated(_lens)
+
+
+@external
 def recover_erc20(token: IERC20, receiver: address):
     """
     @notice This is a helper function to let an admin rescue funds sent by mistake
@@ -370,6 +395,4 @@ def recover_erc20(token: IERC20, receiver: address):
     # when funds are recovered the whole balanced is sent to a trusted address.
     balance_to_recover: uint256 = staticcall token.balanceOf(self)
 
-    assert extcall token.transfer(
-        receiver, balance_to_recover, default_return_value=True
-    )
+    assert extcall token.transfer(receiver, balance_to_recover, default_return_value=True)

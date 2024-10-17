@@ -24,6 +24,15 @@ def rate_manager(request, rewards_handler):
     return _rate_manager
 
 
+@pytest.fixture(params=[CURVE_DAO, boa.env.generate_address("lens_manager")])
+def lens_manager(request, rewards_handler):
+    _lens_manager = request.param
+    if _lens_manager != CURVE_DAO:
+        rewards_handler.grantRole(rewards_handler.LENS_MANAGER(), _lens_manager, sender=CURVE_DAO)
+
+    return _lens_manager
+
+
 @pytest.fixture(params=[CURVE_DAO, boa.env.generate_address("recovery_manager")])
 def recovery_manager(request, rewards_handler):
     _recovery_manager = request.param
@@ -156,16 +165,21 @@ def rewards_handler(
     role_manager,
     minimum_weight,
     scaling_factor,
-    mock_controller_factory,
+    stablecoin_lens,
     curve_dao,
     dev_deployer,
 ):
     rewards_handler_deployer = boa.load_partial("contracts/RewardsHandler.vy")
     with boa.env.prank(dev_deployer):
         rh = rewards_handler_deployer(
-            crvusd, vault, minimum_weight, scaling_factor, mock_controller_factory, curve_dao
+            crvusd, vault, stablecoin_lens, minimum_weight, scaling_factor, curve_dao
         )
 
     vault.set_role(rh, 2**11 | 2**5, sender=role_manager)
 
     return rh
+
+
+@pytest.fixture()
+def stablecoin_lens(mock_controller_factory):
+    return boa.load("contracts/StablecoinLens.vy", mock_controller_factory)

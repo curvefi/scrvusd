@@ -1,0 +1,4 @@
+@view
+@external
+def circulating_supply() -> uint256:
+    ...

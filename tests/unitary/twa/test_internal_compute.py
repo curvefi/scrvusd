@@ -38,7 +38,9 @@ def test_default_behavior_many_deposits_boa(setup_rewards_handler):
     assert rewards_handler.compute_twa() == snapshot_amount
 
 
-def test_default_behavior_twa_one_deposit(setup_vault, setup_rewards_handler, alice, amt_deposit):
+def test_default_behavior_twa_one_deposit(
+    setup_vault, setup_rewards_handler, alice, amt_deposit, stablecoin_lens
+):
     vault = setup_vault
     rewards_handler = setup_rewards_handler
     twa_window = rewards_handler.twa_window()
@@ -50,13 +52,15 @@ def test_default_behavior_twa_one_deposit(setup_vault, setup_rewards_handler, al
     # Compute TWA
     twa = rewards_handler.compute_twa()
 
-    circulating_supply = rewards_handler.eval("lens._circulating_supply()")
+    circulating_supply = stablecoin_lens.circulating_supply()
     expected_twa = amt_deposit * 10**4 // circulating_supply
 
     assert twa == expected_twa, "TWA does not match expected amount"
 
 
-def test_default_behavior_twa_trapezoid(setup_vault, setup_rewards_handler, alice, amt_deposit):
+def test_default_behavior_twa_trapezoid(
+    setup_vault, setup_rewards_handler, alice, amt_deposit, stablecoin_lens
+):
     vault = setup_vault
     rewards_handler = setup_rewards_handler
     twa_window = rewards_handler.twa_window()
@@ -72,13 +76,13 @@ def test_default_behavior_twa_trapezoid(setup_vault, setup_rewards_handler, alic
     # Compute TWA
     twa = rewards_handler.compute_twa()
     # 1.5 * AMT_DEPOSIT because we have two equal deposits and trapezoidal rule
-    circulating_supply = rewards_handler.eval("lens._circulating_supply()")
+    circulating_supply = stablecoin_lens.circulating_supply()
     expected_twa = 1.5 * amt_deposit * 10**4 // circulating_supply
     assert twa == expected_twa, "TWA does not match expected amount"
 
 
 def test_default_behavior_twa_multiple_deposits(
-    setup_vault, setup_rewards_handler, alice, amt_deposit
+    setup_vault, setup_rewards_handler, alice, amt_deposit, stablecoin_lens
 ):
     vault = setup_vault
     rewards_handler = setup_rewards_handler
@@ -134,7 +138,7 @@ def test_default_behavior_twa_multiple_deposits(
     twa = rewards_handler.compute_twa()
 
     total_deposited_amount = amt_deposit * N_ITER
-    circulating_supply = rewards_handler.eval("lens._circulating_supply()")
+    circulating_supply = stablecoin_lens.circulating_supply()
     deposited_rate = total_deposited_amount * 10**4 // circulating_supply
 
     assert twa <= deposited_rate, "TWA is unexpectedly higher than the staked rate"

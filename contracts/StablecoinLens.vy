@@ -22,6 +22,12 @@ def __init__(_factory: IControllerFactory):
 
 
 @view
+@external
+def circulating_supply() -> uint256:
+    return self._circulating_supply()
+
+
+@view
 @internal
 def _circulating_supply() -> uint256:
     """
