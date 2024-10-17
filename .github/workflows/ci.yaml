@@ -55,4 +55,9 @@ jobs:
         env:
           ETH_RPC_URL: ${{ secrets.ETH_RPC_URL }}
           ETHERSCAN_API_KEY: ${{ secrets.ETHERSCAN_API_KEY }}
-        run: uv run pytest ${{ matrix.folder }}
+        run: |
+          if [ "${{ matrix.folder }}" == "tests/unitary" ]; then
+            uv run pytest ${{ matrix.folder }} -n=auto
+          else
+            uv run pytest ${{ matrix.folder }}
+          fi
