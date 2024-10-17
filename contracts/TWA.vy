@@ -107,7 +107,9 @@ def _take_snapshot(_value: uint256):
     @notice Stores a snapshot of the tracked value.
     @param _value The value to store.
     """
-    if self.last_snapshot_timestamp + self.min_snapshot_dt_seconds <= block.timestamp:
+    if (len(self.snapshots) == 0) or (  # First snapshot
+        self.last_snapshot_timestamp + self.min_snapshot_dt_seconds <= block.timestamp # after dt
+    ):
         self.last_snapshot_timestamp = block.timestamp
         self.snapshots.append(
             Snapshot(tracked_value=_value, timestamp=block.timestamp)

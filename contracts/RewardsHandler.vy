@@ -160,7 +160,7 @@ def __init__(
 
     twa.__init__(
         WEEK,  # twa_window = 1 week
-        1,  #  min_snapshot_dt_seconds = 1 second
+        300,  #  min_snapshot_dt_seconds = 600 seconds
     )
 
     self._set_minimum_weight(minimum_weight)
@@ -188,7 +188,15 @@ def take_snapshot():
     or the minimum amount of rewards can always be increased (if a malicious actor
     deflates the value of the snapshot).
     """
+    self._take_snapshot()
 
+
+@internal
+def _take_snapshot():
+    """
+    @notice Internal function to take a snapshot of the current deposited supply
+    ratio in the vault.
+    """
     # get the circulating supply from a helper contract.
     # supply in circulation = controllers' debt + peg keppers' debt
     circulating_supply: uint256 = staticcall self.stablecoin_lens.circulating_supply()
@@ -206,11 +214,14 @@ def take_snapshot():
 
 
 @external
-def process_rewards():
+def process_rewards(take_snapshot: bool = True):
     """
     @notice Permissionless function that let anyone distribute rewards (if any) to
     the crvUSD vault.
     """
+    # optional (advised) snapshot before distributing the rewards
+    if take_snapshot:
+        self._take_snapshot()
 
     # prevent the rewards from being distributed untill the distribution rate
     # has been set
