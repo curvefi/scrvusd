@@ -119,15 +119,13 @@ _SUPPORTED_INTERFACES: constant(bytes4[1]) = [
 
 stablecoin: immutable(IERC20)
 vault: public(immutable(IVault))
+stablecoin_lens: public(IStablecoinLens)
 
 # scaling factor for the deposited token / circulating supply ratio.
 scaling_factor: public(uint256)
 
 # the minimum amount of rewards requested to the FeeSplitter.
 minimum_weight: public(uint256)
-
-# stablecoin circulating supply contract
-stablecoin_lens: public(IStablecoinLens)
 
 
 ################################################################
