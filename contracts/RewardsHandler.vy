@@ -107,9 +107,7 @@ LENS_MANAGER: public(constant(bytes32)) = keccak256("LENS_MANAGER")
 WEEK: constant(uint256) = 86_400 * 7  # 7 days
 MAX_BPS: constant(uint256) = 10**4  # 100%
 
-_SUPPORTED_INTERFACES: constant(bytes4[3]) = [
-    0x01FFC9A7,  # The ERC-165 identifier for ERC-165.
-    0x7965DB0B,  # The ERC-165 identifier for `IAccessControl`.
+_SUPPORTED_INTERFACES: constant(bytes4[1]) = [
     0xA1AAB33F,  # The ERC-165 identifier for the dynamic weight interface.
 ]
 
@@ -121,15 +119,13 @@ _SUPPORTED_INTERFACES: constant(bytes4[3]) = [
 
 stablecoin: immutable(IERC20)
 vault: public(immutable(IVault))
+stablecoin_lens: public(IStablecoinLens)
 
 # scaling factor for the deposited token / circulating supply ratio.
 scaling_factor: public(uint256)
 
 # the minimum amount of rewards requested to the FeeSplitter.
 minimum_weight: public(uint256)
-
-# stablecoin circulating supply contract
-stablecoin_lens: public(IStablecoinLens)
 
 
 ################################################################
@@ -255,7 +251,10 @@ def supportsInterface(interface_id: bytes4) -> bool:
     @return bool The verification whether the contract implements the interface or
     not.
     """
-    return interface_id in _SUPPORTED_INTERFACES
+    return (
+        interface_id in access_control._SUPPORTED_INTERFACES
+        or interface_id in _SUPPORTED_INTERFACES
+    )
 
 
 @external
