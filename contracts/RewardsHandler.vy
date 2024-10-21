@@ -209,7 +209,7 @@ def _take_snapshot():
 
 
 @external
-def process_rewards(take_snapshot: bool = True):
+def process_rewards(take_snapshot: bool = False):
     """
     @notice Permissionless function that let anyone distribute rewards (if any) to
     the crvUSD vault.
