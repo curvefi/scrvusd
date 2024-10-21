@@ -156,7 +156,7 @@ def __init__(
 
     twa.__init__(
         WEEK,  # twa_window = 1 week
-        600,  #  min_snapshot_dt_seconds = 600 seconds
+        3_600,  #  min_snapshot_dt_seconds = 1 hour (3600 sec)
     )
 
     self._set_minimum_weight(minimum_weight)
