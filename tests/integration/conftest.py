@@ -21,7 +21,7 @@ def rpc_url():
 
 @pytest.fixture(autouse=True)
 def forked_env(rpc_url):
-    block_to_fork = 20969484
+    block_to_fork = 21020069
     with boa.swap_env(boa.Env()):
         if BOA_CACHE:
             boa.fork(url=rpc_url, block_identifier=block_to_fork)

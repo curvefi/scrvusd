@@ -33,6 +33,9 @@ def inject_raw_weight(rewards_handler):
 def test_fee_splitter_cap(
     fee_splitter, crvusd, vault, rewards_handler, active_controllers, new_depositor, stablecoin_lens
 ):
+    fee_collector_before = crvusd.balanceOf(ab.crvusd_fee_collector)
+    rewards_handler_before = crvusd.balanceOf(rewards_handler.address)
+
     # test were we ask for so much that we hit the cap
     fee_splitter_cap = fee_splitter.receivers(0)[1]
 
@@ -63,8 +66,10 @@ def test_fee_splitter_cap(
     fee_collector_after = crvusd.balanceOf(ab.crvusd_fee_collector)
     rewards_handler_after = crvusd.balanceOf(rewards_handler.address)
 
+    fee_collector_diff = fee_collector_after - fee_collector_before
+    rewards_handler_diff = rewards_handler_after - rewards_handler_before
     # amount received by the rewards_handler was capped at the source
-    assert fee_collector_after / rewards_handler_after == 9_000 / 1_000
+    assert fee_collector_diff / rewards_handler_diff == 9_000 / 1_000
 
 
 def test_minimum_weight(rewards_handler, minimum_weight, vault, crvusd, new_depositor):
@@ -118,9 +123,15 @@ def test_dynamic_weight_depositors(
         # ================= WEIGHTS CHECKS ==================
 
         with boa.env.anchor():
+            fee_collector_before = crvusd.balanceOf(ab.crvusd_fee_collector)
+            rewards_handler_before = crvusd.balanceOf(rewards_handler.address)
+
             fee_splitter.dispatch_fees(active_controllers)
             fee_collector_after = crvusd.balanceOf(ab.crvusd_fee_collector)
             rewards_handler_after = crvusd.balanceOf(rewards_handler.address)
+
+            fee_collector_diff = fee_collector_after - fee_collector_before
+            rewards_handler_diff = rewards_handler_after - rewards_handler_before
 
         if raw_weight < rewards_handler.minimum_weight():
             assert rewards_handler.weight() >= raw_weight
@@ -132,7 +143,7 @@ def test_dynamic_weight_depositors(
             # if the weight is actually dynamic we want to make sure
             # that the distribution is done according to the weight
 
-            balance_ratio = fee_collector_after * 10_000 // rewards_handler_after
+            balance_ratio = fee_collector_diff * 10_000 // rewards_handler_diff
             excess = 1_000 - raw_weight
             weight_ratio = (9_000 + excess) * 10_000 // raw_weight
 
@@ -140,7 +151,7 @@ def test_dynamic_weight_depositors(
 
         elif raw_weight > fee_splitter_cap:
             # amount received by the rewards_handler was capped at the source
-            assert fee_collector_after / rewards_handler_after == 9_000 / 1_000
+            assert fee_collector_diff / rewards_handler_diff == 9_000 / 1_000
 
         else:
             raise AssertionError("This should not happen")

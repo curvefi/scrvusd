@@ -1,10 +1,7 @@
 import boa
 
-import address_book as ab
-
 
 def test_fee_splitter(fee_splitter, rewards_handler, crvusd, vault, active_controllers):
-    assert crvusd.balanceOf(ab.crvusd_fee_collector) == 0
     assert crvusd.balanceOf(rewards_handler.address) == 0
 
     # ============== SOME DEPOSITS JOIN THE VAULT ==============
