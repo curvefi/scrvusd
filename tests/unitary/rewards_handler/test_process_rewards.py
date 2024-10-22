@@ -33,7 +33,7 @@ def test_snapshots_taking(rewards_handler, rate_manager, crvusd):
     rewards_handler.set_distribution_time(1234, sender=rate_manager)  # to enable process_rewards
     assert rewards_handler.get_len_snapshots() == 0
     boa.deal(crvusd, rewards_handler, 1)
-    rewards_handler.process_rewards()
+    rewards_handler.process_rewards(True)  # True to take snapshot
     assert crvusd.balanceOf(rewards_handler) == 0  # crvusd gone
     assert rewards_handler.get_len_snapshots() == 1  # first snapshot taken
 
@@ -44,6 +44,6 @@ def test_snapshots_taking(rewards_handler, rate_manager, crvusd):
 
     boa.env.time_travel(seconds=rewards_handler.min_snapshot_dt_seconds())
     boa.deal(crvusd, rewards_handler, 1)
-    rewards_handler.process_rewards()
+    rewards_handler.process_rewards(False)  # False to not take snapshot
     assert crvusd.balanceOf(rewards_handler) == 0  # crvusd gone (they always go)
-    assert rewards_handler.get_len_snapshots() == 2  # changed since dt has passed
+    assert rewards_handler.get_len_snapshots() == 1  # not changed since dt has passed but False

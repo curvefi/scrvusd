@@ -51,10 +51,10 @@ MAX_SNAPSHOTS: constant(uint256) = 10**18  # 31.7 billion years if snapshot ever
 ################################################################
 
 
-snapshots: public(DynArray[Snapshot, MAX_SNAPSHOTS])
 min_snapshot_dt_seconds: public(uint256)  # Minimum time between snapshots in seconds
 twa_window: public(uint256)  # Time window in seconds for TWA calculation
 last_snapshot_timestamp: public(uint256)  # Timestamp of the last snapshot
+snapshots: public(DynArray[Snapshot, MAX_SNAPSHOTS])
 
 
 struct Snapshot:
