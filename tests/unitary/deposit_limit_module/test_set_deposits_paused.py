@@ -9,6 +9,10 @@ def test_default_behavior(
     with boa.env.prank(dev_multisig):
         deposit_limit_module.set_deposits_paused(True)
 
+    # Verify event emission
+    events = deposit_limit_module.get_logs()
+    assert f"DepositsPaused(status={True}" in repr(events)
+
     # Verify that deposits are paused
     assert deposit_limit_module.deposits_paused()
 
