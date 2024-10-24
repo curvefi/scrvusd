@@ -9,6 +9,10 @@ def test_default_behavior(deposit_limit_module, dev_multisig):
     with boa.env.prank(dev_multisig):
         deposit_limit_module.set_deposit_limit(new_limit)
 
+    # Verify event emission
+    events = deposit_limit_module.get_logs()
+    assert f"DepositLimitChanged(new_deposit_limit={new_limit}" in repr(events)
+
     # Verify that max_deposit_limit has been updated correctly
     assert deposit_limit_module.max_deposit_limit() == new_limit
 

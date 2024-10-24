@@ -2,9 +2,19 @@
 
 """
 @title Temporary Deposit Limit Module for yearn vaults
-@notice This contract temporarily controls deposits into a yearn vault and manages roles (admin and security_agent).
-@dev Admins can appoint new admins and security_agents, while security_agents can pause or resume deposits.
-This module will be removed once the vault is battle-tested and proven stable.
+
+@notice This contract temporarily controls deposits into a yearn vault and
+manages roles (admin and security_agent).
+
+@dev Admins can appoint new admins and security_agents, while security_agents
+can pause or resume deposits. This module will be removed once the vault is
+battle-tested and proven stable.
+
+@license Copyright (c) Curve.Fi, 2020-2024 - all rights reserved
+
+@author curve.fi
+
+@custom:security security@curve.fi
 """
 
 
@@ -12,11 +22,27 @@ This module will be removed once the vault is battle-tested and proven stable.
 #                           INTERFACES                         #
 ################################################################
 
+
 from interfaces import IVault
+
+
+################################################################
+#                            EVENTS                            #
+################################################################
+
+
+event DepositsPaused:
+    status: bool
+
+
+event DepositLimitChanged:
+    new_deposit_limit: uint256
+
 
 ################################################################
 #                           STORAGE                            #
 ################################################################
+
 
 # Two main roles: admin and security_agent
 is_admin: public(HashMap[address, bool])
@@ -31,9 +57,11 @@ max_deposit_limit: public(uint256)
 # Stablecoin/Vault addresses
 vault: public(immutable(IVault))
 
+
 ################################################################
 #                         CONSTRUCTOR                          #
 ################################################################
+
 
 @deploy
 def __init__(
@@ -55,6 +83,7 @@ def __init__(
 ################################################################
 #                      INTERNAL FUNCTIONS                      #
 ################################################################
+
 
 @internal
 def _set_admin(_address: address, is_admin: bool):
@@ -84,6 +113,8 @@ def _set_deposits_paused(is_paused: bool):
     """
     self.deposits_paused = is_paused
 
+    log DepositsPaused(is_paused)
+
 
 @internal
 def _set_deposit_limit(new_limit: uint256):
@@ -93,10 +124,13 @@ def _set_deposit_limit(new_limit: uint256):
     """
     self.max_deposit_limit = new_limit
 
+    log DepositLimitChanged(new_limit)
+
 
 ################################################################
 #                        EXTERNAL FUNCTIONS                    #
 ################################################################
+
 
 @external
 def set_admin(new_admin: address, is_admin: bool):
@@ -147,6 +181,7 @@ def set_deposit_limit(new_limit: uint256):
 ################################################################
 #                        VIEW FUNCTIONS                        #
 ################################################################
+
 
 @view
 @external
