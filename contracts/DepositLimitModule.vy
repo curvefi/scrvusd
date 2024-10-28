@@ -192,13 +192,15 @@ def available_deposit_limit(receiver: address) -> uint256:
     @return uint256 Returns the maximum deposit limit if deposits are not paused,
     otherwise returns (self.max_deposit_limit - vault_balance).
     """
+    max_deposit_limit: uint256 = self.max_deposit_limit
+
     if self.deposits_paused:
         return 0
-    if self.max_deposit_limit == max_value(uint256):
+    if max_deposit_limit == max_value(uint256):
         return max_value(uint256)
     else:
         vault_balance: uint256 = staticcall vault.totalAssets()
-        if vault_balance >= self.max_deposit_limit:
+        if vault_balance >= max_deposit_limit:
             return 0
         else:
-            return self.max_deposit_limit - vault_balance
+            return max_deposit_limit - vault_balance
