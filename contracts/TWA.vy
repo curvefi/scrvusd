@@ -194,7 +194,7 @@ def _compute() -> uint256:
         total_weighted_tracked_value += averaged_tracked_value * time_delta
         total_time += time_delta
 
-    if total_time == 0 and len(self.snapshots) == 1:
+    if total_time == 0 and num_snapshots == 1:
         # case when only snapshot is taken in the block where computation is called
         return self.snapshots[0].tracked_value
 
