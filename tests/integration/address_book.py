@@ -1,4 +1,4 @@
-# yearn vaults 3.0.3 factory
+# yearn vaults 3.0.4 factory
 yearn_vault_factory = "0x770D0d1Fb036483Ed4AbB6d53c1C88fb277D812F"
 vault_original = "0xd8063123BBA3B480569244AE66BFE72B6c84b00d"
 

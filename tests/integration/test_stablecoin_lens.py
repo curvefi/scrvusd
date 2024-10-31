@@ -1,7 +1,7 @@
 import pytest
 import boa
 
-FORK_BLOCK_SUPPLY = 62247189465433688283786326
+FORK_BLOCK_SUPPLY = 60516752788927113526145029
 
 
 def test_circulating_supply(stablecoin_lens):
