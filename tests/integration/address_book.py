@@ -1,6 +1,6 @@
-# yearn vaults 3.0.3 factory
-yearn_vault_factory = "0x5577EdcB8A856582297CdBbB07055E6a6E38eb5f"
-vault_original = "0xcA78AF7443f3F8FA0148b746Cb18FF67383CDF3f"
+# yearn vaults 3.0.4 factory
+yearn_vault_factory = "0x770D0d1Fb036483Ed4AbB6d53c1C88fb277D812F"
+vault_original = "0xd8063123BBA3B480569244AE66BFE72B6c84b00d"
 
 crvusd = "0xf939E0A03FB07F59A73314E73794Be0E57ac1b4E"
 crvusd_controller_factory = "0xC9332fdCB1C491Dcc683bAe86Fe3cb70360738BC"
