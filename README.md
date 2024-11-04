@@ -41,6 +41,7 @@ $$\text{minimum weight} \leq \text{weight} \leq \text{fee splitter cap}$$
 
 - Upper bounded by whatever percentage cap the fee splitter has. (Controlled by the DAO)
 - Lower bounded by the `minimum_weight` parameter in the rewards handler. (Controlled by any `RATE_MANAGER` appointed by the DAO, or the DAO itself)
+- The weight can be adjusted using a `scaling_factor` if necessary. (Controlled by any `RATE_MANAGER` appointed by the DAO, or the DAO itself)
 
 
 Furthermore, it can be adjusted at any time by any `RATE_MANAGER` by calling the `set_distribution_time` function in the rewards' handler to prevent manipulation (i.e. MEV on the snapshots).

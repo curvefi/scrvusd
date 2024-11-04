@@ -37,10 +37,8 @@ def _circulating_supply() -> uint256:
     @dev This function sacrifices some gas to fetch peg keepers from a unique source
     of truth to avoid having to manually maintain multiple lists across several
     contracts. For this reason we read the list of peg keepers contained in the
-    monetary policy returned by a controller in the factory. factory -> weth
-    controller -> monetary policy -> peg keepers This function is not exposed as
-    external as it can be easily manipulated and should not be used by third party
-    contracts.
+    monetary policy returned by a controller in the factory.
+    factory -> weth controller -> monetary policy -> peg keepers
     """
 
     circulating_supply: uint256 = 0
